@@ -16,6 +16,7 @@ CSTR2   \'([^\'\n\\]|(\\\')|\'\'|'\\\\')+\'
 "\t"       { coluna += 4; }
 " "        { coluna++; }
 "\n"	   { linha++; coluna = 0; }
+"\r"	   { }
 
 {DOUBLE}   { return token( CDOUBLE ); }
 {INT}	   { return token( CINT ); }

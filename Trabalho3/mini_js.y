@@ -79,6 +79,10 @@ string gera_label( string prefixo ) {
   return prefixo + "_" + to_string( ++n ) + ":";
 }
 
+string define_label( string label) {
+  return ":" + label;
+}
+
 void print( vector<string> codigo ) {
   for( string s : codigo )
     cout << s << " ";
@@ -92,23 +96,26 @@ void print( vector<string> codigo ) {
 %token AND OR ME_IG MA_IG DIF IGUAL
 %token MAIS_IGUAL MAIS_MAIS
 
-%right '='
-%nonassoc '<' '>'
+%right '=' MAIS_IGUAL
+%nonassoc AND OR
+%nonassoc IGUAL DIF
+%nonassoc '<' '>' ME_IG MA_IG
 %left '+' '-'
 %left '*' '/' '%'
-
-%left '['
+%right MAIS_MAIS
+%nonassoc '[' '('
 %left '.'
 
 
 %%
 
 S : CMDs { print( resolve_enderecos( $1.c + "." ) ); }
+  |      { /* Programa Vazio */ }
   ;
 
-CMDs : CMDs CMD  { $$.c = $1.c + $2.c; };
-     |           { $$.clear(); }
-     ;
+CMDs: CMDs CMD { $$.c = $1.c + $2.c; }
+    | CMD
+    ;
      
 CMD : CMD_LET ';'
     | CMD_VAR ';'
@@ -123,28 +130,27 @@ CMD : CMD_LET ';'
       { $$.c = $2.c; }
     ;
  
-CMD_FOR : FOR '(' PRIM_E ';' E ';' E ')' CMD 
-        { string lbl_fim_for = gera_label( "fim_for" );
-          string lbl_condicao_for = gera_label( "condicao_for" );
-          string lbl_comando_for = gera_label( "comando_for" );
-          string definicao_lbl_fim_for = ":" + lbl_fim_for;
-          string definicao_lbl_condicao_for = ":" + lbl_condicao_for;
-          string definicao_lbl_comando_for = ":" + lbl_comando_for;
+CMD_FOR : FOR '(' SF ';' E ';' EF ')' CMD 
+        { string teste_for = gera_label( "teste_for" );
+          string fim_for = gera_label( "fim_for" );
           
-          $$.c = $3.c + definicao_lbl_condicao_for +
-                 $5.c + lbl_comando_for + "?" + lbl_fim_for + "#" +
-                 definicao_lbl_comando_for + $9.c + 
-                 $7.c + "^" + lbl_condicao_for + "#" +
-                 definicao_lbl_fim_for;
+          $$.c = $3.c + define_label (teste_for) +
+                 $5.c + "!" + fim_for + "?" + $9.c + 
+                 $7.c + teste_for + "#";
         }
+        //| FOR '(' SF '; ; )' CMD {\\aqui tem que gerar um loop infinito}
         ;
+EF : E
+      { $$.c = $1.c + "^"; };
+    | { $$.clear(); }
+    ;
 
-PRIM_E : CMD_LET 
+SF : CMD_LET 
        | CMD_VAR
        | CMD_CONST
-       | E  
-         { $$.c = $1.c + "^"; }
+       | EF
        ;
+  
 
 CMD_LET : LET LET_VARs { $$.c = $2.c; }
         ;
@@ -187,26 +193,27 @@ CONST_VAR : ID '=' E
                      $1.c + $3.c + "=" + "^"; }
           ;
   
-CMD_IF : IF '(' E ')' CMD ELSE CMD
-         { string lbl_true = gera_label( "lbl_true" );
-           string lbl_fim_if = gera_label( "lbl_fim_if" );
-           string definicao_lbl_true = ":" + lbl_true;
-           string definicao_lbl_fim_if = ":" + lbl_fim_if;
-                    
-            $$.c = $3.c +                       // Codigo da expressão
-                   lbl_true + "?" +             // Código do IF
-                   $7.c + lbl_fim_if + "#" +    // Código do False
-                   definicao_lbl_true + $5.c +  // Código do True
-                   definicao_lbl_fim_if         // Fim do IF
-                   ;
-         }
+CMD_IF : IF '(' E ')' CMD
+          {
+            string fim_if = gera_label( "fim_if" );
+            $$.c = $3.c + "!" + fim_if + "?" + $5.c + define_label(fim_if);
+          }
+
+        | IF '(' E ')' CMD ELSE CMD
+          {  string fim_if = gera_label( "fim_if" );
+            string else_if = gera_label( "else_if" );
+            $$.c = $3.c + "!" + else_if + "?" + $5.c + fim_if + 
+            "#" + define_label(else_if) + $7.c +  define_label(fim_if);
+          }
        ;
         
 LVALUE : ID 
        ;
        
 LVALUEPROP : E '[' E ']'
-           | E '.' ID  
+            { $$.c = $1.c + $3.c; }
+            | E '.' ID  
+            { $$.c = $1.c + $3.c; }
            ;
 
 E : LVALUE '=' '{' '}'
@@ -214,6 +221,8 @@ E : LVALUE '=' '{' '}'
   | LVALUE '=' E 
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $3.c + "="; }
   | LVALUEPROP '=' E 	
+    { $$.c = $1.c + $3.c + "[=]"; }
+  
   | E '<' E
     { $$.c = $1.c + $3.c + $2.c; }
   | E '>' E
@@ -228,17 +237,22 @@ E : LVALUE '=' '{' '}'
     { $$.c = $1.c + $3.c + $2.c; }
   | E '%' E
     { $$.c = $1.c + $3.c + $2.c; }
-  | CDOUBLE
-  | CINT
-  | LVALUE 
-    { checa_simbolo( $1.c[0], false ); $$.c = $1.c + "@"; } 
-  | LVALUEPROP  
-  | '(' E ')'
-    { $$.c = $2.c; }
-  | '(' '{' '}' ')'
-    { $$.c = vector<string>{"{}"}; }
+  | F 
   ;
-  
+
+F : CDOUBLE
+    | CINT
+    | CSTRING
+    | LVALUE
+    { checa_simbolo( $1.c[0], false ); $$.c = $1.c + "@"; }
+    | LVALUEPROP
+    { $$.c = $1.c + "[@]"; }
+    | '(' E ')'
+      { $$.c = $2.c; }
+    | '(' '{' '}' ')'
+      { $$.c = vector<string>{"{}"}; }
+    | LVALUE MAIS_MAIS {$$.c = $1.c + "@" + $1.c + $1.c + "@" + "1" + "+" + "=" + "^";}
+
   
 %%
 
