@@ -249,6 +249,10 @@ E : LVALUE '=' '{' '}'
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $3.c + "="; }
   | LVALUEPROP '=' E 	
     { $$.c = $1.c + $3.c + "[=]"; }
+  | LVALUE MAIS_IGUAL E 
+    {$$.c = $1.c + $1.c + "@" + $3.c + "+" + "=";}
+  | LVALUEPROP MAIS_IGUAL E 
+    {$$.c = $1.c + $1.c + "[@]" + $3.c + "+" + "[=]";}
   | E '<' E
     { $$.c = $1.c + $3.c + $2.c; }
   | E '>' E
@@ -278,7 +282,14 @@ F : CDOUBLE
     | LIST
     | '(' '{' '}' ')'
       { $$.c = vector<string>{"{}"}; }
-    | LVALUE MAIS_MAIS {$$.c = $1.c + "@" + $1.c + $1.c + "@" + "1" + "+" + "=" + "^";}
+    | LVALUE MAIS_MAIS 
+      {$$.c = $1.c + "@" + $1.c + $1.c + "@" + "1" + "+" + "=" + "^";}
+    | LVALUEPROP MAIS_MAIS 
+      {$$.c = $1.c + "[@]" + $1.c + $1.c + "[@]" + "1" + "+" + "[=]" + "^";}
+    | MAIS_MAIS LVALUE 
+      {$$.c = $2.c + $2.c + "@" + "1" + "+" + "=";}
+    | MAIS_MAIS LVALUEPROP 
+      {$$.c = $2.c + $2.c + "[@]" + "1" + "+" + "[=]";}
 
   
 %%
