@@ -159,12 +159,16 @@ LET_VARs : LET_VAR ',' LET_VARs { $$.c = $1.c + $3.c; }
          | LET_VAR
          ;
 
-LET_VAR : ID  
+LET_VAR : LVALUE  
           { $$.c = declara_var( Let, $1 ).c; }
-        | ID '=' E
+        | LVALUE '=' E
           { 
             $$.c = declara_var( Let, $1 ).c + 
                    $1.c + $3.c + "=" + "^"; }
+        | LVALUE '=' '{' '}'
+          {
+            $$.c = declara_var( Let, $1 ).c +
+            $1.c + "{}" + "=" + "^"; }
         ;
   
 CMD_VAR : VAR VAR_VARs { $$.c = $2.c; }
@@ -174,11 +178,15 @@ VAR_VARs : VAR_VAR ',' VAR_VARs { $$.c = $1.c + $3.c; }
          | VAR_VAR
          ;
 
-VAR_VAR : ID  
+VAR_VAR : LVALUE  
           { $$.c = declara_var( Var, $1 ).c; }
-        | ID '=' E
+        | LVALUE '=' E
           {  $$.c = declara_var( Var, $1 ).c + 
                     $1.c + $3.c + "=" + "^"; }
+        | LVALUE '=' '{' '}'
+          {
+            $$.c = declara_var( Var, $1 ).c +
+            $1.c + "{}" + "=" + "^"; }
         ;
   
 CMD_CONST: CONST CONST_VARs { $$.c = $2.c; }
@@ -188,9 +196,15 @@ CONST_VARs : CONST_VAR ',' CONST_VARs { $$.c = $1.c + $3.c; }
            | CONST_VAR
            ;
 
-CONST_VAR : ID '=' E
+CONST_VAR : LVALUE  
+            { $$.c = declara_var( Const, $1 ).c; }
+          | LVALUE '=' E
             { $$.c = declara_var( Const, $1 ).c + 
                      $1.c + $3.c + "=" + "^"; }
+          | LVALUE '=' '{' '}'
+            {
+              $$.c = declara_var( Const, $1 ).c +
+              $1.c + "{}" + "=" + "^"; }
           ;
   
 CMD_IF : IF '(' E ')' CMD
@@ -216,13 +230,25 @@ LVALUEPROP : E '[' E ']'
             { $$.c = $1.c + $3.c; }
            ;
 
+LIST  : '[' LISTVALS ']' { $$.c = $1.c + $2.c + $3.c; }
+      | '[' ']' { $$.c = vector<string>{"[]"}; }
+      ;
+
+LISTVALS : LISTVAL ',' LISTVALS   { $$.c = $1.c + $3.c; }
+         | LISTVAL
+         ;
+
+LISTVAL : E
+        ;
+
 E : LVALUE '=' '{' '}'
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + "{}" + "="; }
+  | LVALUEPROP '=' '{' '}'
+    { checa_simbolo( $1.c[0], true ); $$.c = $1.c + "{}" + "[=]"; }
   | LVALUE '=' E 
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $3.c + "="; }
   | LVALUEPROP '=' E 	
     { $$.c = $1.c + $3.c + "[=]"; }
-  
   | E '<' E
     { $$.c = $1.c + $3.c + $2.c; }
   | E '>' E
@@ -249,6 +275,7 @@ F : CDOUBLE
     { $$.c = $1.c + "[@]"; }
     | '(' E ')'
       { $$.c = $2.c; }
+    | LIST
     | '(' '{' '}' ')'
       { $$.c = vector<string>{"{}"}; }
     | LVALUE MAIS_MAIS {$$.c = $1.c + "@" + $1.c + $1.c + "@" + "1" + "+" + "=" + "^";}
