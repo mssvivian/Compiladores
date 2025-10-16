@@ -138,7 +138,6 @@ CMD_FOR : FOR '(' SF ';' E ';' EF ')' CMD
                  $5.c + "!" + fim_for + "?" + $9.c + 
                  $7.c + teste_for + "#";
         }
-        //| FOR '(' SF '; ; )' CMD {\\aqui tem que gerar um loop infinito}
         ;
 EF : E
       { $$.c = $1.c + "^"; };
@@ -146,10 +145,10 @@ EF : E
     ;
 
 SF : CMD_LET 
-       | CMD_VAR
-       | CMD_CONST
-       | EF
-       ;
+    | CMD_VAR
+    | CMD_CONST
+    | EF
+    ;
   
 
 CMD_LET : LET LET_VARs { $$.c = $2.c; }
@@ -245,6 +244,8 @@ E : LVALUE '=' '{' '}'
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + "{}" + "="; }
   | LVALUEPROP '=' '{' '}'
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + "{}" + "[=]"; }
+  | LVALUEPROP
+    { $$.c = $1.c + "[@]"; }
   | LVALUE '=' E 
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $3.c + "="; }
   | LVALUEPROP '=' E 	
@@ -253,6 +254,8 @@ E : LVALUE '=' '{' '}'
     {$$.c = $1.c + $1.c + "@" + $3.c + "+" + "=";}
   | LVALUEPROP MAIS_IGUAL E 
     {$$.c = $1.c + $1.c + "[@]" + $3.c + "+" + "[=]";}
+  | E IGUAL E
+    { $$.c = $1.c + $3.c + $2.c ; }
   | E '<' E
     { $$.c = $1.c + $3.c + $2.c; }
   | E '>' E
@@ -275,8 +278,8 @@ F : CDOUBLE
     | CSTRING
     | LVALUE
     { checa_simbolo( $1.c[0], false ); $$.c = $1.c + "@"; }
-    | LVALUEPROP
-    { $$.c = $1.c + "[@]"; }
+    | '-' F 
+      { $$.c = "0" + $2.c + "-" ; }
     | '(' E ')'
       { $$.c = $2.c; }
     | LIST
@@ -284,12 +287,8 @@ F : CDOUBLE
       { $$.c = vector<string>{"{}"}; }
     | LVALUE MAIS_MAIS 
       {$$.c = $1.c + "@" + $1.c + $1.c + "@" + "1" + "+" + "=" + "^";}
-    | LVALUEPROP MAIS_MAIS 
-      {$$.c = $1.c + "[@]" + $1.c + $1.c + "[@]" + "1" + "+" + "[=]" + "^";}
     | MAIS_MAIS LVALUE 
       {$$.c = $2.c + $2.c + "@" + "1" + "+" + "=";}
-    | MAIS_MAIS LVALUEPROP 
-      {$$.c = $2.c + $2.c + "[@]" + "1" + "+" + "[=]";}
 
   
 %%
@@ -299,6 +298,7 @@ F : CDOUBLE
 Atributos declara_var( TipoDecl tipo, Atributos atrib ) {
       
   string nome_var = atrib.c[0];
+  string mensagem_erro;
 
   if (tipo == Var){
     if( ts.count(nome_var) > 0 && ts[nome_var].tipo != Var){
@@ -307,7 +307,8 @@ Atributos declara_var( TipoDecl tipo, Atributos atrib ) {
     atrib.c.clear();
   } 
   else if (ts.count(nome_var) > 0){
-    yyerror("Variavel já declarada");
+    cerr << "Erro: a variável '" << nome_var << "' ja foi declarada na linha " << to_string(ts[nome_var].linha) << "." << endl;
+    exit(1);
   }
   else{
     ts[nome_var].linha = atrib.linha;
@@ -321,12 +322,12 @@ Atributos declara_var( TipoDecl tipo, Atributos atrib ) {
 void checa_simbolo( string nome, bool modificavel ) {
   if( ts.count( nome ) > 0 ) {
     if( modificavel && ts[nome].tipo == Const ) {
-      cerr << "Variavel '" << nome << "' não pode ser modificada." << endl;
+      cerr << "Erro: a variável '" << nome << "' não pode ser modificada." << endl;
       exit( 1 );     
     }
   }
   else {
-    cerr << "Variavel '" << nome << "' não declarada." << endl;
+    cerr << "Erro: a variável '" << nome << "' não foi declarada." << endl;
     exit( 1 );     
   }
 }

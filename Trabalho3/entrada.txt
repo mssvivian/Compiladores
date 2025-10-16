@@ -1,4 +1,5 @@
-let a = 1, b, x;
-x = b = a * (8 + 1.1);
-let c = "hello ";
-c += ", " + 'world' + '!';
+let a = {}, campo = "c";
+
+for( let i = 0; i < 6; i = i + 2 ) {
+  a[campo = campo + i] = i;
+};

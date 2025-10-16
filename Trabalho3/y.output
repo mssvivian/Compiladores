@@ -88,24 +88,24 @@ Grammar
 
    48 E: LVALUE '=' '{' '}'
    49  | LVALUEPROP '=' '{' '}'
-   50  | LVALUE '=' E
-   51  | LVALUEPROP '=' E
-   52  | LVALUE MAIS_IGUAL E
-   53  | LVALUEPROP MAIS_IGUAL E
-   54  | E '<' E
-   55  | E '>' E
-   56  | E '+' E
-   57  | E '-' E
-   58  | E '*' E
-   59  | E '/' E
-   60  | E '%' E
-   61  | F
+   50  | LVALUEPROP
+   51  | LVALUE '=' E
+   52  | LVALUEPROP '=' E
+   53  | LVALUE MAIS_IGUAL E
+   54  | LVALUEPROP MAIS_IGUAL E
+   55  | E '<' E
+   56  | E '>' E
+   57  | E '+' E
+   58  | E '-' E
+   59  | E '*' E
+   60  | E '/' E
+   61  | E '%' E
+   62  | F
 
-   62 F: CDOUBLE
-   63  | CINT
-   64  | CSTRING
-   65  | LVALUE
-   66  | LVALUEPROP
+   63 F: CDOUBLE
+   64  | CINT
+   65  | CSTRING
+   66  | LVALUE
    67  | '(' E ')'
    68  | LIST
    69  | '(' '{' '}' ')'
@@ -118,19 +118,19 @@ Grammar
 Terminals, with rules where they appear
 
     $end (0) 0
-    '%' (37) 60
+    '%' (37) 61
     '(' (40) 13 38 39 67 69
     ')' (41) 13 38 39 67 69
-    '*' (42) 58
-    '+' (43) 56
+    '*' (42) 59
+    '+' (43) 57
     ',' (44) 21 27 33 45
-    '-' (45) 57
+    '-' (45) 58
     '.' (46) 42
-    '/' (47) 59
+    '/' (47) 60
     ';' (59) 5 6 7 9 11 13
-    '<' (60) 54
-    '=' (61) 24 25 30 31 36 37 48 49 50 51
-    '>' (62) 55
+    '<' (60) 55
+    '=' (61) 24 25 30 31 36 37 48 49 51 52
+    '>' (62) 56
     '[' (91) 41 43 44
     ']' (93) 41 43 44
     '{' (123) 12 25 31 37 48 49 69
@@ -145,16 +145,16 @@ Terminals, with rules where they appear
     PRINT (264) 9
     FOR (265) 13
     WHILE (266)
-    CDOUBLE (267) 62
-    CSTRING (268) 64
-    CINT (269) 63
+    CDOUBLE (267) 63
+    CSTRING (268) 65
+    CINT (269) 64
     AND (270)
     OR (271)
     ME_IG (272)
     MA_IG (273)
     DIF (274)
     IGUAL (275)
-    MAIS_IGUAL (276) 52 53
+    MAIS_IGUAL (276) 53 54
     MAIS_MAIS (277) 70 71 72 73
 
 
@@ -212,10 +212,10 @@ Nonterminals, with rules where they appear
         on right: 8
     LVALUE (57)
         on left: 40
-        on right: 23 24 25 29 30 31 35 36 37 48 50 52 65 70 72
+        on right: 23 24 25 29 30 31 35 36 37 48 51 53 66 70 72
     LVALUEPROP (58)
         on left: 41 42
-        on right: 49 51 53 66 71 73
+        on right: 49 50 52 54 71 73
     LIST (59)
         on left: 43 44
         on right: 68
@@ -226,11 +226,11 @@ Nonterminals, with rules where they appear
         on left: 47
         on right: 45 46
     E (62)
-        on left: 48 49 50 51 52 53 54 55 56 57 58 59 60 61
-        on right: 9 11 13 14 24 30 36 38 39 41 42 47 50 51 52 53 54 55 56 57 58 59 60 67
+        on left: 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62
+        on right: 9 11 13 14 24 30 36 38 39 41 42 47 51 52 53 54 55 56 57 58 59 60 61 67
     F (63)
-        on left: 62 63 64 65 66 67 68 69 70 71 72 73
-        on right: 61
+        on left: 63 64 65 66 67 68 69 70 71 72 73
+        on right: 62
 
 
 State 0
@@ -345,23 +345,23 @@ State 7
 
 State 8
 
-   62 F: CDOUBLE •
+   63 F: CDOUBLE •
 
-    $default  reduce using rule 62 (F)
+    $default  reduce using rule 63 (F)
 
 
 State 9
 
-   64 F: CSTRING •
+   65 F: CSTRING •
 
-    $default  reduce using rule 64 (F)
+    $default  reduce using rule 65 (F)
 
 
 State 10
 
-   63 F: CINT •
+   64 F: CINT •
 
-    $default  reduce using rule 63 (F)
+    $default  reduce using rule 64 (F)
 
 
 State 11
@@ -548,31 +548,31 @@ State 22
 State 23
 
    48 E: LVALUE • '=' '{' '}'
-   50  | LVALUE • '=' E
-   52  | LVALUE • MAIS_IGUAL E
-   65 F: LVALUE •
+   51  | LVALUE • '=' E
+   53  | LVALUE • MAIS_IGUAL E
+   66 F: LVALUE •
    70  | LVALUE • MAIS_MAIS
 
     MAIS_IGUAL  shift, and go to state 55
     MAIS_MAIS   shift, and go to state 56
     '='         shift, and go to state 57
 
-    $default  reduce using rule 65 (F)
+    $default  reduce using rule 66 (F)
 
 
 State 24
 
    49 E: LVALUEPROP • '=' '{' '}'
-   51  | LVALUEPROP • '=' E
-   53  | LVALUEPROP • MAIS_IGUAL E
-   66 F: LVALUEPROP •
-   71  | LVALUEPROP • MAIS_MAIS
+   50  | LVALUEPROP •
+   52  | LVALUEPROP • '=' E
+   54  | LVALUEPROP • MAIS_IGUAL E
+   71 F: LVALUEPROP • MAIS_MAIS
 
     MAIS_IGUAL  shift, and go to state 58
     MAIS_MAIS   shift, and go to state 59
     '='         shift, and go to state 60
 
-    $default  reduce using rule 66 (F)
+    $default  reduce using rule 50 (E)
 
 
 State 25
@@ -587,13 +587,13 @@ State 26
    11 CMD: E • ';'
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   55 E: E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
     '<'  shift, and go to state 61
     '>'  shift, and go to state 62
@@ -609,9 +609,9 @@ State 26
 
 State 27
 
-   61 E: F •
+   62 E: F •
 
-    $default  reduce using rule 61 (E)
+    $default  reduce using rule 62 (E)
 
 
 State 28
@@ -723,13 +723,13 @@ State 38
     9 CMD: PRINT E • ';'
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   55 E: E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
     '<'  shift, and go to state 61
     '>'  shift, and go to state 62
@@ -775,9 +775,9 @@ State 39
 State 40
 
    48 E: LVALUE • '=' '{' '}'
-   50  | LVALUE • '=' E
-   52  | LVALUE • MAIS_IGUAL E
-   65 F: LVALUE •
+   51  | LVALUE • '=' E
+   53  | LVALUE • MAIS_IGUAL E
+   66 F: LVALUE •
    70  | LVALUE • MAIS_MAIS
    72  | MAIS_MAIS LVALUE •
 
@@ -785,45 +785,46 @@ State 40
     MAIS_MAIS   shift, and go to state 56
     '='         shift, and go to state 57
 
-    '<'       reduce using rule 65 (F)
+    '<'       reduce using rule 66 (F)
     '<'       [reduce using rule 72 (F)]
-    '>'       reduce using rule 65 (F)
+    '>'       reduce using rule 66 (F)
     '>'       [reduce using rule 72 (F)]
-    '+'       reduce using rule 65 (F)
+    '+'       reduce using rule 66 (F)
     '+'       [reduce using rule 72 (F)]
-    '-'       reduce using rule 65 (F)
+    '-'       reduce using rule 66 (F)
     '-'       [reduce using rule 72 (F)]
-    '*'       reduce using rule 65 (F)
+    '*'       reduce using rule 66 (F)
     '*'       [reduce using rule 72 (F)]
-    '/'       reduce using rule 65 (F)
+    '/'       reduce using rule 66 (F)
     '/'       [reduce using rule 72 (F)]
-    '%'       reduce using rule 65 (F)
+    '%'       reduce using rule 66 (F)
     '%'       [reduce using rule 72 (F)]
-    '['       reduce using rule 65 (F)
+    '['       reduce using rule 66 (F)
     '['       [reduce using rule 72 (F)]
-    '.'       reduce using rule 65 (F)
+    '.'       reduce using rule 66 (F)
     '.'       [reduce using rule 72 (F)]
     ';'       reduce using rule 72 (F)
     ')'       reduce using rule 72 (F)
     ','       reduce using rule 72 (F)
     ']'       reduce using rule 72 (F)
-    $default  reduce using rule 65 (F)
+    $default  reduce using rule 66 (F)
 
     reduce/reduce conflict on tokens '<', '>', '+', '-', '*', '/', '%', '[', '.':
-       65 F: LVALUE •
+       66 F: LVALUE •
        72 F: MAIS_MAIS LVALUE •
       Example: MAIS_MAIS LVALUE • '.' ID
       First reduce derivation
-        F
-        ↳ 73: MAIS_MAIS LVALUEPROP
-                        ↳ 42: E                    '.' ID
-                              ↳ 61: F
-                                    ↳ 65: LVALUE •
+        E
+        ↳ 62: F
+              ↳ 73: MAIS_MAIS LVALUEPROP
+                              ↳ 42: E                    '.' ID
+                                    ↳ 62: F
+                                          ↳ 66: LVALUE •
       Second reduce derivation
-        F
-        ↳ 66: LVALUEPROP
+        E
+        ↳ 50: LVALUEPROP
               ↳ 42: E                              '.' ID
-                    ↳ 61: F
+                    ↳ 62: F
                           ↳ 72: MAIS_MAIS LVALUE •
 
 
@@ -831,55 +832,55 @@ State 40
 State 41
 
    49 E: LVALUEPROP • '=' '{' '}'
-   51  | LVALUEPROP • '=' E
-   53  | LVALUEPROP • MAIS_IGUAL E
-   66 F: LVALUEPROP •
-   71  | LVALUEPROP • MAIS_MAIS
+   50  | LVALUEPROP •
+   52  | LVALUEPROP • '=' E
+   54  | LVALUEPROP • MAIS_IGUAL E
+   71 F: LVALUEPROP • MAIS_MAIS
    73  | MAIS_MAIS LVALUEPROP •
 
     MAIS_IGUAL  shift, and go to state 58
     MAIS_MAIS   shift, and go to state 59
     '='         shift, and go to state 60
 
-    '<'       reduce using rule 66 (F)
+    '<'       reduce using rule 50 (E)
     '<'       [reduce using rule 73 (F)]
-    '>'       reduce using rule 66 (F)
+    '>'       reduce using rule 50 (E)
     '>'       [reduce using rule 73 (F)]
-    '+'       reduce using rule 66 (F)
+    '+'       reduce using rule 50 (E)
     '+'       [reduce using rule 73 (F)]
-    '-'       reduce using rule 66 (F)
+    '-'       reduce using rule 50 (E)
     '-'       [reduce using rule 73 (F)]
-    '*'       reduce using rule 66 (F)
+    '*'       reduce using rule 50 (E)
     '*'       [reduce using rule 73 (F)]
-    '/'       reduce using rule 66 (F)
+    '/'       reduce using rule 50 (E)
     '/'       [reduce using rule 73 (F)]
-    '%'       reduce using rule 66 (F)
+    '%'       reduce using rule 50 (E)
     '%'       [reduce using rule 73 (F)]
-    '['       reduce using rule 66 (F)
+    '['       reduce using rule 50 (E)
     '['       [reduce using rule 73 (F)]
-    '.'       reduce using rule 66 (F)
+    '.'       reduce using rule 50 (E)
     '.'       [reduce using rule 73 (F)]
     ';'       reduce using rule 73 (F)
     ')'       reduce using rule 73 (F)
     ','       reduce using rule 73 (F)
     ']'       reduce using rule 73 (F)
-    $default  reduce using rule 66 (F)
+    $default  reduce using rule 50 (E)
 
     reduce/reduce conflict on tokens '<', '>', '+', '-', '*', '/', '%', '[', '.':
-       66 F: LVALUEPROP •
+       50 E: LVALUEPROP •
        73 F: MAIS_MAIS LVALUEPROP •
       Example: MAIS_MAIS LVALUEPROP • '.' ID
       First reduce derivation
-        F
-        ↳ 73: MAIS_MAIS LVALUEPROP
-                        ↳ 42: E                        '.' ID
-                              ↳ 61: F
-                                    ↳ 66: LVALUEPROP •
+        E
+        ↳ 62: F
+              ↳ 73: MAIS_MAIS LVALUEPROP
+                              ↳ 42: E                  '.' ID
+                                    ↳ 50: LVALUEPROP •
       Second reduce derivation
-        F
-        ↳ 66: LVALUEPROP
+        E
+        ↳ 50: LVALUEPROP
               ↳ 42: E                                  '.' ID
-                    ↳ 61: F
+                    ↳ 62: F
                           ↳ 73: MAIS_MAIS LVALUEPROP •
 
 
@@ -888,13 +889,13 @@ State 42
 
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   55 E: E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
     '<'  shift, and go to state 61
     '>'  shift, and go to state 62
@@ -936,13 +937,13 @@ State 46
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
    47 LISTVAL: E •
-   54 E: E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   55 E: E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
     '<'  shift, and go to state 61
     '>'  shift, and go to state 62
@@ -968,13 +969,13 @@ State 48
 
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   55 E: E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
    67 F: '(' E • ')'
 
     '<'  shift, and go to state 61
@@ -1060,7 +1061,7 @@ State 54
 
 State 55
 
-   52 E: LVALUE MAIS_IGUAL • E
+   53 E: LVALUE MAIS_IGUAL • E
 
     ID         shift, and go to state 1
     CDOUBLE    shift, and go to state 8
@@ -1087,7 +1088,7 @@ State 56
 State 57
 
    48 E: LVALUE '=' • '{' '}'
-   50  | LVALUE '=' • E
+   51  | LVALUE '=' • E
 
     ID         shift, and go to state 1
     CDOUBLE    shift, and go to state 8
@@ -1107,7 +1108,7 @@ State 57
 
 State 58
 
-   53 E: LVALUEPROP MAIS_IGUAL • E
+   54 E: LVALUEPROP MAIS_IGUAL • E
 
     ID         shift, and go to state 1
     CDOUBLE    shift, and go to state 8
@@ -1134,7 +1135,7 @@ State 59
 State 60
 
    49 E: LVALUEPROP '=' • '{' '}'
-   51  | LVALUEPROP '=' • E
+   52  | LVALUEPROP '=' • E
 
     ID         shift, and go to state 1
     CDOUBLE    shift, and go to state 8
@@ -1154,7 +1155,7 @@ State 60
 
 State 61
 
-   54 E: E '<' • E
+   55 E: E '<' • E
 
     ID         shift, and go to state 1
     CDOUBLE    shift, and go to state 8
@@ -1173,7 +1174,7 @@ State 61
 
 State 62
 
-   55 E: E '>' • E
+   56 E: E '>' • E
 
     ID         shift, and go to state 1
     CDOUBLE    shift, and go to state 8
@@ -1192,7 +1193,7 @@ State 62
 
 State 63
 
-   56 E: E '+' • E
+   57 E: E '+' • E
 
     ID         shift, and go to state 1
     CDOUBLE    shift, and go to state 8
@@ -1211,7 +1212,7 @@ State 63
 
 State 64
 
-   57 E: E '-' • E
+   58 E: E '-' • E
 
     ID         shift, and go to state 1
     CDOUBLE    shift, and go to state 8
@@ -1230,7 +1231,7 @@ State 64
 
 State 65
 
-   58 E: E '*' • E
+   59 E: E '*' • E
 
     ID         shift, and go to state 1
     CDOUBLE    shift, and go to state 8
@@ -1249,7 +1250,7 @@ State 65
 
 State 66
 
-   59 E: E '/' • E
+   60 E: E '/' • E
 
     ID         shift, and go to state 1
     CDOUBLE    shift, and go to state 8
@@ -1268,7 +1269,7 @@ State 66
 
 State 67
 
-   60 E: E '%' • E
+   61 E: E '%' • E
 
     ID         shift, and go to state 1
     CDOUBLE    shift, and go to state 8
@@ -1324,13 +1325,13 @@ State 71
    39       | IF '(' E • ')' CMD ELSE CMD
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   55 E: E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
     '<'  shift, and go to state 61
     '>'  shift, and go to state 62
@@ -1487,13 +1488,13 @@ State 84
    14 EF: E •
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   55 E: E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
     '<'  shift, and go to state 61
     '>'  shift, and go to state 62
@@ -1561,73 +1562,14 @@ State 90
 
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   52 E: LVALUE MAIS_IGUAL E •
-   54  | E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
-
-    '<'  shift, and go to state 61
-    '>'  shift, and go to state 62
-    '+'  shift, and go to state 63
-    '-'  shift, and go to state 64
-    '*'  shift, and go to state 65
-    '/'  shift, and go to state 66
-    '%'  shift, and go to state 67
-    '['  shift, and go to state 68
-    '.'  shift, and go to state 69
-
-    $default  reduce using rule 52 (E)
-
-
-State 91
-
-   48 E: LVALUE '=' '{' • '}'
-
-    '}'  shift, and go to state 118
-
-
-State 92
-
-   41 LVALUEPROP: E • '[' E ']'
-   42           | E • '.' ID
-   50 E: LVALUE '=' E •
-   54  | E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
-
-    '<'  shift, and go to state 61
-    '>'  shift, and go to state 62
-    '+'  shift, and go to state 63
-    '-'  shift, and go to state 64
-    '*'  shift, and go to state 65
-    '/'  shift, and go to state 66
-    '%'  shift, and go to state 67
-    '['  shift, and go to state 68
-    '.'  shift, and go to state 69
-
-    $default  reduce using rule 50 (E)
-
-
-State 93
-
-   41 LVALUEPROP: E • '[' E ']'
-   42           | E • '.' ID
-   53 E: LVALUEPROP MAIS_IGUAL E •
-   54  | E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   53 E: LVALUE MAIS_IGUAL E •
+   55  | E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
     '<'  shift, and go to state 61
     '>'  shift, and go to state 62
@@ -1642,25 +1584,25 @@ State 93
     $default  reduce using rule 53 (E)
 
 
-State 94
+State 91
 
-   49 E: LVALUEPROP '=' '{' • '}'
+   48 E: LVALUE '=' '{' • '}'
 
-    '}'  shift, and go to state 119
+    '}'  shift, and go to state 118
 
 
-State 95
+State 92
 
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   51 E: LVALUEPROP '=' E •
-   54  | E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   51 E: LVALUE '=' E •
+   55  | E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
     '<'  shift, and go to state 61
     '>'  shift, and go to state 62
@@ -1675,19 +1617,21 @@ State 95
     $default  reduce using rule 51 (E)
 
 
-State 96
+State 93
 
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   54  | E '<' E •
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   54 E: LVALUEPROP MAIS_IGUAL E •
+   55  | E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
+    '<'  shift, and go to state 61
+    '>'  shift, and go to state 62
     '+'  shift, and go to state 63
     '-'  shift, and go to state 64
     '*'  shift, and go to state 65
@@ -1696,24 +1640,54 @@ State 96
     '['  shift, and go to state 68
     '.'  shift, and go to state 69
 
-    '<'  error (nonassociative)
-    '>'  error (nonassociative)
-
     $default  reduce using rule 54 (E)
 
 
-State 97
+State 94
+
+   49 E: LVALUEPROP '=' '{' • '}'
+
+    '}'  shift, and go to state 119
+
+
+State 95
 
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   55  | E • '>' E
-   55  | E '>' E •
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   52 E: LVALUEPROP '=' E •
+   55  | E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
+
+    '<'  shift, and go to state 61
+    '>'  shift, and go to state 62
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+    '%'  shift, and go to state 67
+    '['  shift, and go to state 68
+    '.'  shift, and go to state 69
+
+    $default  reduce using rule 52 (E)
+
+
+State 96
+
+   41 LVALUEPROP: E • '[' E ']'
+   42           | E • '.' ID
+   55 E: E • '<' E
+   55  | E '<' E •
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
     '+'  shift, and go to state 63
     '-'  shift, and go to state 64
@@ -1729,40 +1703,45 @@ State 97
     $default  reduce using rule 55 (E)
 
 
-State 98
+State 97
 
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   56  | E '+' E •
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   55 E: E • '<' E
+   56  | E • '>' E
+   56  | E '>' E •
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
     '*'  shift, and go to state 65
     '/'  shift, and go to state 66
     '%'  shift, and go to state 67
     '['  shift, and go to state 68
     '.'  shift, and go to state 69
 
+    '<'  error (nonassociative)
+    '>'  error (nonassociative)
+
     $default  reduce using rule 56 (E)
 
 
-State 99
+State 98
 
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   57  | E '-' E •
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   55 E: E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   57  | E '+' E •
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
     '*'  shift, and go to state 65
     '/'  shift, and go to state 66
@@ -1773,37 +1752,40 @@ State 99
     $default  reduce using rule 57 (E)
 
 
-State 100
+State 99
 
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   58  | E '*' E •
-   59  | E • '/' E
-   60  | E • '%' E
+   55 E: E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   58  | E '-' E •
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+    '%'  shift, and go to state 67
     '['  shift, and go to state 68
     '.'  shift, and go to state 69
 
     $default  reduce using rule 58 (E)
 
 
-State 101
+State 100
 
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   59  | E '/' E •
-   60  | E • '%' E
+   55 E: E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   59  | E '*' E •
+   60  | E • '/' E
+   61  | E • '%' E
 
     '['  shift, and go to state 68
     '.'  shift, and go to state 69
@@ -1811,18 +1793,18 @@ State 101
     $default  reduce using rule 59 (E)
 
 
-State 102
+State 101
 
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
-   60  | E '%' E •
+   55 E: E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   60  | E '/' E •
+   61  | E • '%' E
 
     '['  shift, and go to state 68
     '.'  shift, and go to state 69
@@ -1830,18 +1812,37 @@ State 102
     $default  reduce using rule 60 (E)
 
 
+State 102
+
+   41 LVALUEPROP: E • '[' E ']'
+   42           | E • '.' ID
+   55 E: E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
+   61  | E '%' E •
+
+    '['  shift, and go to state 68
+    '.'  shift, and go to state 69
+
+    $default  reduce using rule 61 (E)
+
+
 State 103
 
    41 LVALUEPROP: E • '[' E ']'
    41           | E '[' E • ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   55 E: E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
     '<'  shift, and go to state 61
     '>'  shift, and go to state 62
@@ -1914,13 +1915,13 @@ State 108
    24 LET_VAR: LVALUE '=' E •
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   55 E: E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
     '<'  shift, and go to state 61
     '>'  shift, and go to state 62
@@ -1954,13 +1955,13 @@ State 111
    36 CONST_VAR: LVALUE '=' E •
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   55 E: E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
     '<'  shift, and go to state 61
     '>'  shift, and go to state 62
@@ -1994,13 +1995,13 @@ State 114
    30 VAR_VAR: LVALUE '=' E •
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   55 E: E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
     '<'  shift, and go to state 61
     '>'  shift, and go to state 62
@@ -2122,13 +2123,13 @@ State 125
    13 CMD_FOR: FOR '(' SF ';' E • ';' EF ')' CMD
    41 LVALUEPROP: E • '[' E ']'
    42           | E • '.' ID
-   54 E: E • '<' E
-   55  | E • '>' E
-   56  | E • '+' E
-   57  | E • '-' E
-   58  | E • '*' E
-   59  | E • '/' E
-   60  | E • '%' E
+   55 E: E • '<' E
+   56  | E • '>' E
+   57  | E • '+' E
+   58  | E • '-' E
+   59  | E • '*' E
+   60  | E • '/' E
+   61  | E • '%' E
 
     '<'  shift, and go to state 61
     '>'  shift, and go to state 62
