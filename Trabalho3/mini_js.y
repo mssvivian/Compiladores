@@ -121,22 +121,25 @@ CMD : CMD_LET ';'
     | CMD_VAR ';'
     | CMD_CONST ';'
     | CMD_IF
-    | PRINT E ';' 
+    | PRINT E ';'
       { $$.c = $2.c + "println" + "#"; }
     | CMD_FOR
+    | CMD_WHILE
     | E ';'
-      { $$.c = $1.c + "^"; };
-    | '{' CMDs '}'  
+      { $$.c = $1.c + "^"; }
+    | '{' CMDs '}' 
       { $$.c = $2.c; }
+    | ';'
+      { $$.clear(); }
     ;
- 
+
 CMD_FOR : FOR '(' SF ';' E ';' EF ')' CMD 
         { string teste_for = gera_label( "teste_for" );
           string fim_for = gera_label( "fim_for" );
           
           $$.c = $3.c + define_label (teste_for) +
                  $5.c + "!" + fim_for + "?" + $9.c + 
-                 $7.c + teste_for + "#";
+                 $7.c + teste_for + "#" + define_label(fim_for);
         }
         ;
 EF : E
@@ -149,6 +152,15 @@ SF : CMD_LET
     | CMD_CONST
     | EF
     ;
+
+CMD_WHILE : WHILE '(' E ')' CMD
+        { string inicio_while = gera_label( "inicio_while" );
+          string fim_while = gera_label( "fim_while" );
+          $$.c = define_label(inicio_while) + 
+                 $3.c + "!" + fim_while + "?" + $5.c + 
+                 inicio_while + "#" + define_label(fim_while);
+        }
+        ;
   
 
 CMD_LET : LET LET_VARs { $$.c = $2.c; }
