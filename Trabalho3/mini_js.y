@@ -94,7 +94,7 @@ void print( vector<string> codigo ) {
 %token ID IF ELSE LET CONST VAR PRINT FOR WHILE
 %token CDOUBLE CSTRING CINT
 %token AND OR ME_IG MA_IG DIF IGUAL
-%token MAIS_IGUAL MAIS_MAIS
+%token MAIS_IGUAL MAIS_MAIS MENOS_IGUAL MENOS_MENOS
 
 %right '=' MAIS_IGUAL
 %nonassoc AND OR
@@ -102,8 +102,8 @@ void print( vector<string> codigo ) {
 %nonassoc '<' '>' ME_IG MA_IG
 %left '+' '-'
 %left '*' '/' '%'
-%right MAIS_MAIS
-%nonassoc '[' '('
+%right MAIS_MAIS 
+%left '[' '(' 
 %left '.'
 
 
@@ -125,13 +125,14 @@ CMD : CMD_LET ';'
       { $$.c = $2.c + "println" + "#"; }
     | CMD_FOR
     | CMD_WHILE
-    | E ';'
-      { $$.c = $1.c + "^"; }
+    | ATRIB ';'
+      { $$.c = $1.c + "^"; } 
     | '{' CMDs '}' 
       { $$.c = $2.c; }
     | ';'
       { $$.clear(); }
     ;
+
 
 CMD_FOR : FOR '(' SF ';' E ';' EF ')' CMD 
         { string teste_for = gera_label( "teste_for" );
@@ -142,7 +143,7 @@ CMD_FOR : FOR '(' SF ';' E ';' EF ')' CMD
                  $7.c + teste_for + "#" + define_label(fim_for);
         }
         ;
-EF : E
+EF : ATRIB
       { $$.c = $1.c + "^"; };
     | { $$.clear(); }
     ;
@@ -161,7 +162,6 @@ CMD_WHILE : WHILE '(' E ')' CMD
                  inicio_while + "#" + define_label(fim_while);
         }
         ;
-  
 
 CMD_LET : LET LET_VARs { $$.c = $2.c; }
         ;
@@ -235,7 +235,7 @@ CMD_IF : IF '(' E ')' CMD
 LVALUE : ID 
        ;
        
-LVALUEPROP : E '[' E ']'
+LVALUEPROP : E '[' ATRIB ']'
             { $$.c = $1.c + $3.c; }
             | E '.' ID  
             { $$.c = $1.c + $3.c; }
@@ -252,22 +252,28 @@ LISTVALS : LISTVAL ',' LISTVALS   { $$.c = $1.c + $3.c; }
 LISTVAL : E
         ;
 
-E : LVALUE '=' '{' '}'
-    { checa_simbolo( $1.c[0], true ); $$.c = $1.c + "{}" + "="; }
-  | LVALUEPROP '=' '{' '}'
-    { checa_simbolo( $1.c[0], true ); $$.c = $1.c + "{}" + "[=]"; }
-  | LVALUEPROP
-    { $$.c = $1.c + "[@]"; }
-  | LVALUE '=' E 
+ATRIB
+  : LVALUE '=' ATRIB
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $3.c + "="; }
-  | LVALUEPROP '=' E 	
+  | LVALUE MAIS_IGUAL ATRIB 
+    { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $1.c + "@" + $3.c + "+" + "="; }
+  | LVALUEPROP '=' ATRIB
     { $$.c = $1.c + $3.c + "[=]"; }
-  | LVALUE MAIS_IGUAL E 
-    {$$.c = $1.c + $1.c + "@" + $3.c + "+" + "=";}
-  | LVALUEPROP MAIS_IGUAL E 
-    {$$.c = $1.c + $1.c + "[@]" + $3.c + "+" + "[=]";}
+  | LVALUEPROP MAIS_IGUAL ATRIB 
+    { $$.c = $1.c + $1.c + "[@]" + $3.c + "+" + "[=]"; }
+  | LVALUE '=' '{' '}'
+      { checa_simbolo( $1.c[0], true ); $$.c = $1.c + "{}" + "="; }
+  | LVALUEPROP '=' '{' '}'
+      { checa_simbolo( $1.c[0], true ); $$.c = $1.c + "{}" + "[=]"; }
+  | E 
+  ;
+
+E : LVALUEPROP
+    { $$.c = $1.c + "[@]"; }
+  | LVALUE
+    { checa_simbolo( $1.c[0], false ); $$.c = $1.c + "@"; }
   | E IGUAL E
-    { $$.c = $1.c + $3.c + $2.c ; }
+    { $$.c = $1.c + $3.c + $2.c; }
   | E '<' E
     { $$.c = $1.c + $3.c + $2.c; }
   | E '>' E
@@ -282,25 +288,38 @@ E : LVALUE '=' '{' '}'
     { $$.c = $1.c + $3.c + $2.c; }
   | E '%' E
     { $$.c = $1.c + $3.c + $2.c; }
-  | F 
+  | '-' E 
+    { $$.c = "0" + $2.c + "-" ; }
+  | '+' E
+    { $$.c = "0" + $2.c + "+" ; }
+  | F
+    { $$.c = $1.c; }
   ;
 
-F : CDOUBLE
+
+F :   MAIS_MAIS LVALUE 
+      {$$.c = $2.c + $2.c + "@" + "1" + "+" + "=";}
+    | MENOS_MENOS LVALUE 
+      {$$.c = $2.c + $2.c + "@" + "1" + "+" + "=";}
+    | LVALUE MAIS_MAIS 
+      {$$.c = $1.c + "@" + $1.c + $1.c + "@" + "1" + "+" + "=" + "^";}
+    | LVALUE MENOS_MENOS 
+      {$$.c = $1.c + "@" + $1.c + $1.c + "@" + "1" + "+" + "=" + "^";}
+
+
+    | LVALUEPROP MAIS_MAIS 
+      {$$.c = $1.c + "[@]" + $1.c + $1.c + "[@]" + "1" + "+" + "[=]" + "^";}
+    | LVALUEPROP MENOS_MENOS 
+      {$$.c = $1.c + "[@]" + $1.c + $1.c + "@" + "1" + "+" + "=" + "^";}
+    | CDOUBLE
     | CINT
     | CSTRING
-    | LVALUE
-    { checa_simbolo( $1.c[0], false ); $$.c = $1.c + "@"; }
-    | '-' F 
-      { $$.c = "0" + $2.c + "-" ; }
     | '(' E ')'
       { $$.c = $2.c; }
     | LIST
     | '(' '{' '}' ')'
       { $$.c = vector<string>{"{}"}; }
-    | LVALUE MAIS_MAIS 
-      {$$.c = $1.c + "@" + $1.c + $1.c + "@" + "1" + "+" + "=" + "^";}
-    | MAIS_MAIS LVALUE 
-      {$$.c = $2.c + $2.c + "@" + "1" + "+" + "=";}
+  ;
 
   
 %%

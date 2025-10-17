@@ -147,3 +147,10 @@ Erro: a variável 'a' ja foi declarada na linha 1.
 === Vars ===
 |{ }|
 === Pilha ===
+
+
+
+  | LVALUE MENOS_IGUAL E 
+    {$$.c = $1.c + $1.c + "@" + $3.c + "-" + "=";}
+  | LVALUEPROP MENOS_IGUAL E 
+    {$$.c = $1.c + $1.c + "[@]" + $3.c + "-" + "[=]";}

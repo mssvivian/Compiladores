@@ -31,6 +31,8 @@ CSTR2   \'([^\'\n\\]|(\\\')|\'\'|'\\\\')+\'
 
 "+="       { return token( MAIS_IGUAL ); }
 "++"       { return token( MAIS_MAIS ); }
+"-="       { return token( MENOS_IGUAL ); }
+"--"       { return token( MENOS_MENOS ); }
 
 "let"      { return token( LET ); }
 "const"    { return token( CONST ); }
