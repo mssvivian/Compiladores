@@ -1,5 +1,6 @@
-let a = {}, campo = "c";
+let a = 1, c = 0; 
+let b = {};
 
-for( let i = 0; i < 6; i = i + 2 ) {
-  a[campo = campo + i] = i;
-};
+b.c = a++; 
+a += 5; 
+c -= b.c;

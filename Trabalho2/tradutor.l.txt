@@ -1,0 +1,249 @@
+%{
+#include <iostream>
+#include <string>
+#include <map>
+
+using namespace std;
+
+void CMDS();
+void A();
+void E();
+void E_linha();
+void T();
+void T_linha();
+void U();
+void P();
+void FAT1();
+void FAT();
+void F1();
+void F();
+void ARGS();
+void E1();
+string nome_token( int );
+int next_token();
+
+int token;
+string lexema;
+
+enum {
+    _FIM = 0,
+    _NUMERO = 256,
+    _STRING,
+    _ID,
+    _PRINT
+};
+
+map<int, string> nome_tokens = {
+    {_NUMERO, "numero"},
+    {_STRING, "string"},
+    {_ID, "identificador"},
+    {_PRINT, "print"}
+};
+
+
+
+%}
+
+DIGITO  [0-9]
+LETRA   [A-Za-z_]
+NUMERO  {DIGITO}+("."{DIGITO}+)?
+ID      {LETRA}({LETRA}|{DIGITO})*
+STRING  \"([^"\\\n]|\\.|\"\")*\"
+WS      [ \n\r\t]
+
+%%
+
+{WS}        {}
+
+"print"     { lexema = yytext; return (_PRINT); }
+{NUMERO}    { lexema = yytext; return (_NUMERO); }
+{STRING}    { lexema = string(yytext); return (_STRING); }
+{ID}        { lexema = yytext; return (_ID); }
+
+.           { lexema = yytext; return (*yytext); }
+
+%%
+
+void gerarCodigo(const string& s) { cout << s << " "; }
+
+void reportarErro(const string& msg) {
+    cerr << "Erro sintático: " << msg << " (lexema: '" << lexema << "')" << endl;
+    exit(1);
+}
+
+string nome_token( int t ) {
+    if (nome_tokens.count(t)) { return nome_tokens[t]; }
+    string s; s += (char)t; return s;
+}
+
+int next_token() { return yylex(); }
+
+void casa( int esperado ) {
+  if( token == esperado )
+    token = next_token();
+  else {
+      cout << "Esperado " << nome_token( esperado )
+	   << " , encontrado: " << nome_token( token ) << endl;
+    exit( 1 );
+  }
+}
+
+void CMDS() {
+    if (token != _FIM) {
+        A();
+        CMDS();
+    }
+}
+
+void A() {
+    if (token == _ID) {
+        string id_salvo = lexema;
+        casa(_ID);
+        gerarCodigo(id_salvo);
+        casa('=');
+        E();
+        casa(';');
+        gerarCodigo("= ^");
+    } else if (token == _PRINT) {
+        casa(_PRINT);
+        E();
+        casa(';');
+        gerarCodigo("print #");
+    } else {
+        reportarErro("Comando (atribuição ou print) esperado.");
+    }
+}
+
+void E() {
+    T();
+    E_linha();
+}
+
+void E_linha() {
+    if (token == '+') {
+        casa('+');
+        T();
+        gerarCodigo("+");
+        E_linha();
+    } else if (token == '-') {
+        casa('-');
+        T();
+        gerarCodigo("-");
+        E_linha();
+    }
+}
+
+void T() {
+    U();
+    T_linha();
+}
+
+void T_linha() {
+    if (token == '*') {
+        casa('*');
+        U();
+        gerarCodigo("*");
+        T_linha();
+    } else if (token == '/') {
+        casa('/');
+        U();
+        gerarCodigo("/");
+        T_linha();
+    }
+}
+
+void U() {
+    if (token == '+') {
+        casa('+');
+        U();
+    } else if (token == '-') {
+        casa('-');
+        gerarCodigo("0");
+        U();
+        gerarCodigo("-");
+    } else {
+        P();
+    }
+}
+
+void P() {
+    FAT();
+    FAT1();
+}
+
+void FAT1() {
+    if (token == '^') {
+        casa('^');
+        P();
+        gerarCodigo("power #");
+    }
+}
+
+void FAT() {
+    F();
+    F1();
+}
+
+void F1() {
+    if (token == '!') {
+        casa('!');
+        gerarCodigo("fat #");
+    }
+}
+
+void F() {
+    switch (token) {
+        case _ID: {
+            string id_salvo = lexema;
+            casa(_ID);
+
+            if (token == '(') {
+                casa('(');
+                if (token != ')') {
+                    ARGS(); 
+                }
+                casa(')');
+                gerarCodigo(id_salvo);
+                gerarCodigo("#");
+            } else {
+                gerarCodigo(id_salvo);
+                gerarCodigo("@");
+            }
+            break;
+        }
+        case _NUMERO:
+            gerarCodigo(lexema);
+            casa(_NUMERO);
+            break;
+        case _STRING:
+            gerarCodigo(lexema);
+            casa(_STRING);
+            break;
+        case '(':
+            casa('(');
+            E();
+            casa(')');
+            break;
+        default:
+            reportarErro("Operando (numero, id, expressao) esperado.");
+    }
+}
+
+void ARGS() {
+    E();
+    E1();
+}
+
+void E1() {
+    if (token == ',') {
+        casa(',');
+        ARGS();
+    }
+}
+
+int main() {
+    token = next_token();
+    CMDS();
+    cout << endl;
+    return 0;
+}

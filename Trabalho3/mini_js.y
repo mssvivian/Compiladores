@@ -257,6 +257,8 @@ ATRIB
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $3.c + "="; }
   | LVALUE MAIS_IGUAL ATRIB 
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $1.c + "@" + $3.c + "+" + "="; }
+  | LVALUE MENOS_IGUAL ATRIB 
+    { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $1.c + "@" + $3.c + "-" + "="; }
   | LVALUEPROP '=' ATRIB
     { $$.c = $1.c + $3.c + "[=]"; }
   | LVALUEPROP MAIS_IGUAL ATRIB 

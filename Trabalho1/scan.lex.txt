@@ -1,0 +1,109 @@
+%{
+
+#include <iostream>
+
+using namespace std;
+
+string lexema;
+
+
+string process_escapes(const string& content, char quote_char) {
+    string result = "";
+    result.reserve(content.length()); 
+
+    for (size_t i = 0; i < content.length(); ++i) {
+        if (content[i] == '\\' && i + 1 < content.length() && content[i+1] == quote_char) {
+            result += content[i + 1];
+            i++;
+        }
+        else if (content[i] == quote_char && i + 1 < content.length() && content[i + 1] == quote_char) {
+            result += quote_char;
+            i++; 
+        }
+        else {
+            result += content[i];
+        }
+    }
+    return result;
+}
+
+string strip_delimiters(const string& raw_text) {
+    if (raw_text.length() < 2) {
+        return "";
+    }
+    return raw_text.substr(1, raw_text.length() - 2);
+}
+
+string process_string(const char* text) {
+    string raw_string(text);
+    
+    if (raw_string.length() < 2) {
+        return "";
+    }
+    
+    char quote_char = raw_string[0];
+    string content = strip_delimiters(raw_string);
+    
+    return process_escapes(content, quote_char);
+}
+
+%}
+
+
+/* Coloque aqui definições regulares */
+
+WS	[ \t\n]
+
+DIGITO      [0-9]
+LETRA       [a-zA-Z]
+ID_START    ({LETRA}|_|\$)
+ID_CHAR     ({LETRA}|{DIGITO}|_)
+
+ID          {ID_START}{ID_CHAR}*
+INVALID_ID  ({ID_START}){ID_CHAR}*\$[{ID_CHAR}\$]*
+
+FLOAT       {DIGITO}+(\.{DIGITO}*)?([eE][+-]?{DIGITO}+)? 
+%x S_STRING2
+%x EXPR_STATE
+
+%%
+    /* Padrões e ações. Nesta seção, comentários devem ter um tab antes */
+
+{WS}	{ /* ignora espaços, tabs e '\n' */ }
+
+[fF][oO][rR]      { lexema = yytext; return _FOR; }
+[iI][fF]          { lexema = yytext; return _IF; }
+">="              { lexema = yytext; return _MAIG; }
+"<="              { lexema = yytext; return _MEIG; }
+"=="              { lexema = yytext; return _IG; }
+"!="              { lexema = yytext; return _DIF; }
+
+"/*"([^*]|\*+[^*/])*\*+"/"|("//".*)     { lexema = yytext; return _COMENTARIO; }
+
+\"([^"\\\n]|\\.|\"\")*\"|'([^'\\\n]|\\.|\'\')*'   { lexema = process_string(yytext); return _STRING; }
+
+    /* STRING 2 */
+
+`                               { BEGIN(S_STRING2); }
+<S_STRING2>([^`$]+|\$[^\{]|\n)+   { lexema = yytext; return _STRING2; }
+<S_STRING2>\$\{                 { BEGIN(EXPR_STATE); }
+<EXPR_STATE>{ID}                { lexema = yytext; }
+<EXPR_STATE>"}"                 { BEGIN(S_STRING2); return _EXPR; }
+<S_STRING2>`                     { BEGIN(INITIAL); }
+
+
+
+{DIGITO}+                               { lexema = yytext; return _INT; }
+
+{FLOAT}                                 { lexema = yytext; return _FLOAT; }
+
+{INVALID_ID}                            { cout << "Erro: Identificador invalido: " << yytext << endl; }
+
+{ID}                                    { lexema = yytext; return _ID; }
+
+.       { lexema = yytext; return yytext[0]; 
+          /* Essa deve ser a última regra. Dessa forma qualquer caractere isolado será retornado pelo seu código ascii. */ }
+
+%%
+
+/* Não coloque nada aqui - a função main é automaticamente incluída na hora de avaliar e dar a nota. */
