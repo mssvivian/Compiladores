@@ -1,4 +1,4 @@
-1:
+1: ok 
 
 function log( msg ) {
   msg asm{println # undefined};
@@ -36,7 +36,7 @@ var c = c+ c++;
 |{ a: 9; c: 14; log: { &funcao: ##; }; undefined: undefined; }|
 === Pilha ===
 
-3:
+3: ok
 
 --- Input ---
 let b, c;

@@ -171,9 +171,9 @@ CMD : E ASM ';'  { $$.c = $1.c + $2.c; }
     // --- CORREÇÃO 5: 'RETURN' deve ATRIBUIR para '&retorno' com '=' ---
     // --- CORREÇÃO 7: Removidas aspas de '&retorno' ---
     | RETURN ';'
-      { $$.c = vector<string>{ "undefined", "&retorno", "=", "~" }; }
+      { $$.c = vector<string>{ "undefined", "'&retorno'", "=", "~" }; }
     | RETURN E ';'
-      { $$.c = $2.c + vector<string>{ "&retorno", "=", "~" }; }
+      { $$.c = $2.c + vector<string>{ "'&retorno'", "=", "~" }; }
     | CMD_FOR
     | CMD_WHILE
     | ATRIB ';'
@@ -189,14 +189,13 @@ EMPILHA_TS : { ts.push_back( map< string, Simbolo >{} ); }
            ;
     
 // --- CORREÇÃO 1: CMD_FUNC agora usa CMDs para permitir corpo vazio ---
-CMD_FUNC : FUNCTION NOME_FUNCAO { /*declara_var( Let, $2 );*/ in_func++; } 
-             '(' EMPILHA_TS LISTA_PARAMs ')' '{' CMDs '}'
+CMD_FUNC : FUNCTION NOME_FUNCAO '(' EMPILHA_TS LISTA_PARAMs ')' '{' CMDs '}'
            { 
              string definicao_lbl_endereco_funcao = ":" + $2.endereco_funcao;
              
              $$.c = $2.c ;
 
-             funcoes = funcoes + definicao_lbl_endereco_funcao + $6.c + $9.c +
+             funcoes = funcoes + definicao_lbl_endereco_funcao + $5.c + $8.c +
                        "undefined" + "@" + "'&retorno'" + "@"+ "~";
              ts.pop_back(); 
              in_func--;
@@ -204,7 +203,7 @@ CMD_FUNC : FUNCTION NOME_FUNCAO { /*declara_var( Let, $2 );*/ in_func++; }
          ;
          
 NOME_FUNCAO : ID 
-            { string endereco_funcao = gera_label( "func_" + $1.c[0] );
+            { string endereco_funcao = gera_label( "func_" + $1.c[0] ); in_func++;
               $$.c = $1.c + "&" + $1.c + "{}" + "=" + "'&funcao'" + $$.endereco_funcao + "[=]" + "^"; }
           ;
 
@@ -464,61 +463,68 @@ F :   CDOUBLE
     | CHAMA_FUNC
   ;
 
-// --- CORREÇÃO 4: Lógica de 'CHAMA_FUNC' totalmente refeita ---
-// --- CORREÇÃO 7: Removidas aspas de 'arguments', 'this', '&funcao', '&retorno' ---
+/* --- CORREÇÃO: Trocando '~' (ret) por '$' (call) --- */
 CHAMA_FUNC : ID '(' LISTA_ARGS ')' 
               { 
-                string lbl_retorno = gera_label( "retorno_funcao" );
-                $$.c = $3.c + // 1. Empilha array de argumentos
-                       "arguments" + "&" + "=" + "^" + // 2. Salva em 'arguments'
-                       $1.c[0] + "@" + // 3. Empilha objeto da função (lendo da var)
-                       "dup" + "this" + "&" + "=" + "^" + // 4. Salva em 'this'
-                       "&funcao" + "[@]" + // 5. Pega o label do código
-                       lbl_retorno + "[&]" + // 6. Empilha endereço de retorno
-                       "~" + // 7. CHAMA
-                       define_label( lbl_retorno ) + // 8. Ponto de retorno
-                       "&retorno" + "@"; // 9. Empilha valor de retorno
+                /* $3.c agora é (arg_code) + (count) */
+                $$.c = $3.c + // 1. Empilha args e contagem
+                       $1.c[0] + "@" + // 2. Empilha objeto da função (lendo da var)
+                  
+                       "$" + // 6. CHAMA (a instrução '$' do seu exemplo)
+                       "^";
               }
             | LVALUEPROP '(' LISTA_ARGS ')' 
               { 
                 string lbl_retorno = gera_label( "retorno_funcao" );
-                $$.c = $3.c + // 1. Empilha array de argumentos
-                       "arguments" + "&" + "=" + "^" + // 2. Salva em 'arguments'
-                       $1.c + "[@]" + // 3. Empilha objeto da função (LVALUEPROP + [@])
-                       "dup" + "this" + "&" + "=" + "^" + // 4. Salva em 'this'
-                      	"&funcao" + "[@]" + // 5. Pega o label do código
-                      	lbl_retorno + "[&]" + // 6. Empilha endereço de retorno
-                      	"~" + // 7. CHAMA
-                      	define_label( lbl_retorno ) + // 8. Ponto de retorno
-                      	"&retorno" + "@"; // 9. Empilha valor de retorno
+                $$.c = $3.c + // 1. Empilha args e contagem
+                       $1.c + "[@]" + // 2. Empilha objeto da função (LVALUEPROP + [@])
+                        "$" + // 6. CHAMA (a instrução '$')
+                        "^";
               }
-      	  | '(' E ')' '(' LISTA_ARGS ')' 
-      	    { 
-      	      string lbl_retorno = gera_label( "retorno_funcao" );
-      	      $$.c = $5.c + // 1. Empilha array de argumentos
-      	       	 	 "arguments" + "&" + "=" + "^" + // 2. Salva em 'arguments'
-      	       	 	 $2.c + // 3. Empilha objeto da função (resultado de E)
-      	       	 	 "dup" + "this" + "&" + "=" + "^" + // 4. Salva em 'this'
-      	       	 	 "&funcao" + "[@]" + // 5. Pega o label do código
-      	       	 	 lbl_retorno + "[&]" + // 6. Empilha endereço de retorno
-      	       	 	 "~" + // 7. CHAMA
-      	       	 	 define_label( lbl_retorno ) + // 8. Ponto de retorno
-  	       	 	 	 "&retorno" + "@"; // 9. Empilha valor de retorno
-      	    }
-      	  ;
+    
+    | '(' E ')' '(' LISTA_ARGS ')' 
+            { 
+              string lbl_retorno = gera_label( "retorno_funcao" );
+              $$.c = $5.c + // 1. Empilha args e contagem
+                   $2.c + // 2. Empilha objeto da função (resultado de E)
+                    "@" +
+                   "$" + // 6. CHAMA (a instrução '$') + "^";
+                    "^";
 
-// --- CORREÇÃO 4: 'LISTA_ARGS' e 'ARGs' agora constroem um array ---
+           }
+          ;
+
 LISTA_ARGS : ARGs
-           | { $$.c = vector<string>{"[]"}; } // Lista de args vazia -> array vazio
+           { 
+             // $1.c tem o código dos argumentos
+             // $1.n_args tem a contagem
+             // Adiciona a contagem no final
+             $$.c = $1.c + to_string( $1.n_args ); 
+             $$.n_args = $1.n_args;
+           }
+           | { 
+               // Sem argumentos. Empilha a contagem "0".
+               $$.c = vector<string>{"0"}; 
+               $$.n_args = 0; 
+           }
            ;
 
 ARGs : E
-      { $$.c = vector<string>{"[]"} + $1.c + "append"; } // Primeiro arg
-  	| ARGs ',' E  
-  	  { $$.c = $1.c + $3.c + "append"; } // Args subsequentes
-  	;
+      { 
+        $$.c = $1.c;     // É o código para o primeiro argumento
+        $$.n_args = 1;   // A contagem é 1
+      } 
+    | ARGs ',' E  
+      { 
+        // Concatena o código do novo argumento
+        $$.c = $1.c + $3.c; 
+        // Incrementa a contagem
+        $$.n_args = $1.n_args + 1; 
+      }
+    ;
 
-ARG : E // Esta regra não é mais usada por LISTA_ARGS
+/* Esta regra não será mais usada, mas pode deixar */
+ARG : E
     ;
   
 %%
@@ -545,26 +551,34 @@ Atributos declara_var( TipoDecl tipo, Atributos atrib ) {
   string mensagem_erro;
 
   if (tipo == Var){
-    if( ts.back().count(nome_var) > 0 && ts.back()[nome_var].tipo != Var){
-      yyerror("Variavel já declarada com var ou let");
+    if( ts.back().count(nome_var) > 0){
+      if (ts.back()[nome_var].tipo != Var){
+        yyerror("Variavel já declarada com const ou let");
+      }
+      else{//redefine var
+        ts.back()[nome_var].linha = atrib.linha;
+        ts.back()[nome_var].coluna = atrib.coluna;
+        ts.back()[nome_var].tipo = tipo;
+        atrib.c = atrib.c;
+      }
     }
-    // 'var' não gera código de alocação por si só, mas deve ser
-    // registrada na tabela de símbolos (escopo atual) para que
-    // futuras referências encontrem a declaração.
-    ts.back()[nome_var].linha = atrib.linha;
-    ts.back()[nome_var].coluna = atrib.coluna;
-    ts.back()[nome_var].tipo = tipo;
-    atrib.c.clear(); // mantém comportamento: não emite '&' para var
-  } 
-  else if (ts.back().count(nome_var) > 0){ // let/const checa só escopo atual
-    cerr << "Erro: a variável '" << nome_var << "' ja foi declarada na linha " << to_string(ts.back()[nome_var].linha) << "." << endl;
-    exit(1);
-  }
-  else{
+    else{//declara var
     ts.back()[nome_var].linha = atrib.linha;
     ts.back()[nome_var].coluna = atrib.coluna;
     ts.back()[nome_var].tipo = tipo;
     atrib.c = atrib.c + "&"; // Gera código de alocação (ex: 'a &')
+    }
+    
+  } 
+  else if (ts.back().count(nome_var) > 0){ // let/const checa só escopo atual
+    cerr << "Erro: a variável '" << nome_var << "' já foi declarada na linha " << to_string(ts.back()[nome_var].linha) << "." << endl;
+    exit(1);
+  }
+  else{ //declara nova variável
+    ts.back()[nome_var].linha = atrib.linha;
+    ts.back()[nome_var].coluna = atrib.coluna;
+    ts.back()[nome_var].tipo = tipo;
+    atrib.c = atrib.c + "&"; 
   }
   return atrib;
 }
