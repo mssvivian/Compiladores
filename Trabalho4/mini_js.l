@@ -44,11 +44,13 @@ CSTR2   \'([^\'\n\\]|(\\\')|\'\'|'\\\\')+\'
 "var"      { return token( VAR ); }
 "if"       { return token( IF ); }
 "else"     { return token( ELSE ); }
-"print"    { return token( PRINT ); }
+  /*"print"    { return token( PRINT ); }*/
 "for"      { return token( FOR ); }
 "while"      { return token( WHILE ); }
 "function" { return token( FUNCTION ); }
 "return"   { return token( RETURN ); }
+
+"true"|"false" { return token (CBOOL); }
 
 "asm{"[^}]*"}"  {
                 string s = string(yytext);

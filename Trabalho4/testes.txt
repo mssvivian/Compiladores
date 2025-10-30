@@ -12,7 +12,7 @@ Hello, world!
 |{ log: { &funcao: ##; }; r: undefined; undefined: undefined; }|
 === Pilha ===
 
-2:
+2: ok
 
 --- Input ---
 const a = 9;
@@ -112,7 +112,7 @@ if( b[0] ) { let a = -1; {
 |0|
 |undefined|
 
-6:
+6: ok
 
 --- Input ---
 let str = "hello";
@@ -154,7 +154,8 @@ let y = 0.01, a = sqr( 5.2, 7, );
 
 9: AINDA SEM 
 10: AINDA SEM
-11:
+
+11: ok
 
 --- Input ---
 function f( x, y, z ) { 
@@ -170,7 +171,7 @@ Erro: a variável 'z' já foi declarada na linha 1.
 |{ undefined: undefined; }|
 === Pilha ===
 
-12:
+12: ok
 
 --- Input ---
 function mdc( a, b ) { 
@@ -188,7 +189,7 @@ let a = mdc( 24, 33, 8  );
 |{ a: 3; mdc: { &funcao: ##; }; undefined: undefined; }|
 === Pilha ===
 
-13:
+13: ok
 
 --- Input ---
 function teste( a, b ) { 
@@ -269,7 +270,7 @@ Codigo de erro: 3.14
 === Pilha ===
 |0|
 
-16:
+16: ok
 
 --- Input ---
 function f( x ) {

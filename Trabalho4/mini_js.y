@@ -39,21 +39,19 @@ struct Simbolo {
   int coluna;
 };
 
-int in_func = 0;
 
 // Tabela de símbolos - agora é uma pilha
 vector< map< string, Simbolo > > ts = { map< string, Simbolo >{} }; 
 vector<string> funcoes;
 
+vector<int> pilha_funcoes;
+
 
 Atributos declara_var( TipoDecl tipo, Atributos atrib );
 void checa_simbolo( string nome, bool modificavel );
-// --- CORREÇÃO 2: Adicionada função 'busca_simbolo' para escopo aninhado ---
+
 Simbolo* busca_simbolo( string nome );
 
-
-// Armazena o código (instruções) de todas as funções encontradas.
-// vector<string> funcoes;
 
 // Divide uma string em vetor de strings usando espaço em branco como separador
 vector<string> tokeniza(const string& s) {
@@ -132,10 +130,9 @@ void print( vector<string> codigo ) {
 }
 %}
 
-/* %define removed for POSIX yacc compatibility; using #define YYSTYPE Atributos */
 
-%token ID IF ELSE LET CONST VAR PRINT FOR WHILE FUNCTION RETURN ASM
-%token CDOUBLE CSTRING CINT
+%token ID IF ELSE LET CONST VAR  FOR WHILE FUNCTION RETURN ASM //PRINT
+%token CDOUBLE CSTRING CINT CBOOL
 %token AND OR ME_IG MA_IG DIF IGUAL
 %token MAIS_IGUAL MAIS_MAIS MENOS_IGUAL MENOS_MENOS
 
@@ -160,37 +157,50 @@ CMDs : CMDs CMD  { $$.c = $1.c + $2.c; };
      ;
            
 
-CMD : E ASM ';'  { $$.c = $1.c + $2.c; }
-    | CMD_LET ';'
+CMD : CMD_LET ';'
     | CMD_VAR ';'
     | CMD_CONST ';'
     | CMD_IF
     | CMD_FUNC
-    | PRINT E ';'
-      { $$.c = $2.c + "println" + "#"; }
-    // --- CORREÇÃO 5: 'RETURN' deve ATRIBUIR para '&retorno' com '=' ---
-    // --- CORREÇÃO 7: Removidas aspas de '&retorno' ---
-    | RETURN ';'
-      { $$.c = vector<string>{ "undefined", "'&retorno'", "=", "~" }; }
-    | RETURN E ';'
-      { $$.c = $2.c + vector<string>{ "'&retorno'", "=", "~" }; }
+    //| PRINT E ';'
+    //  { $$.c = $2.c + "println" + "#"; }
     | CMD_FOR
     | CMD_WHILE
+    | CMD_RET ';'
+    | CMD_ASM ';'
     | ATRIB ';'
       { $$.c = $1.c + "^"; } 
-    // --- CORREÇÃO 1: Blocos '{...}' agora criam/destroem escopos ---
-    | '{' EMPILHA_TS CMDs '}' 
-      { $$.c = $3.c; ts.pop_back(); }
+    | BLOCO
     | ';'
       { $$.clear(); }
     ;
 
+BLOCO : '{' EMPILHA_TS CMDs '}' 
+        { $$.c = "<{" + $3.c + "}>" ; ts.pop_back(); 
+          //pilha_funcoes.back()++;
+        }
+       ;
+       
+CMD_RET : RETURN E
+          { 
+            /*int quant_ret = pilha_funcoes.back();
+            pilha_funcoes.pop_back();
+            vector<string> retornos;
+            for( int i = 0; i < quant_ret; i++ )
+                retornos.push_back( "}>" ); erro de seg nao é aqui*/
+            $$.c = $2.c +  vector<string>{ "'&retorno'", "@", "~" }; 
+            
+            }
+         ;
+CMD_ASM : E ASM { $$.c = $1.c + $2.c + "^"; }
+        ;
+
 EMPILHA_TS : { ts.push_back( map< string, Simbolo >{} ); } 
            ;
     
-// --- CORREÇÃO 1: CMD_FUNC agora usa CMDs para permitir corpo vazio ---
 CMD_FUNC : FUNCTION NOME_FUNCAO '(' EMPILHA_TS LISTA_PARAMs ')' '{' CMDs '}'
            { 
+             //pilha_funcoes.push_back(1);
              string definicao_lbl_endereco_funcao = ":" + $2.endereco_funcao;
              
              $$.c = $2.c ;
@@ -198,25 +208,26 @@ CMD_FUNC : FUNCTION NOME_FUNCAO '(' EMPILHA_TS LISTA_PARAMs ')' '{' CMDs '}'
              funcoes = funcoes + definicao_lbl_endereco_funcao + $5.c + $8.c +
                        "undefined" + "@" + "'&retorno'" + "@"+ "~";
              ts.pop_back(); 
-             in_func--;
+             
            }
          ;
          
 NOME_FUNCAO : ID 
-            { string endereco_funcao = gera_label( "func_" + $1.c[0] ); in_func++;
+            { string endereco_funcao = gera_label( "func_" + $1.c[0] );
+              Atributos decl = declara_var( Var, $1 ); // Declara a função no escopo atual
               $$.c = $1.c + "&" + $1.c + "{}" + "=" + "'&funcao'" + $$.endereco_funcao + "[=]" + "^"; }
           ;
 
 LISTA_PARAMs : PARAMs
-           | { $$.clear(); }
+           | PARAMs ','   
+           | { $$.clear(); } 
            ;
            
-// --- CORREÇÃO 3: 'PARAMs' agora chama 'declara_var' para cada parâmetro ---
 PARAMs : PARAMs ',' PARAM  
        { 
          Atributos decl = declara_var( Let, $3 ); // Declara o parâmetro no escopo da função
-         $$.c = $1.c + decl.c + // Código de alocação (ex: msg &)
-                $3.c[0] + "arguments" + "@" + to_string( $1.n_args ) // Nome da var + ...
+         $$.c = $1.c + decl.c + 
+                $3.c[0] + "arguments" + "@" + to_string( $1.n_args ) 
                 + "[@]" + "=" + "^"; 
                 
          if( $3.valor_default.size() > 0 ) {
@@ -227,8 +238,8 @@ PARAMs : PARAMs ',' PARAM
      | PARAM 
        { 
          Atributos decl = declara_var( Let, $1 ); // Declara o parâmetro no escopo da função
-         $$.c = decl.c + // Código de alocação (ex: msg &)
-                $1.c[0] + "arguments" + "@" + "0" + "[@]" + "=" + "^"; // Nome da var + ...
+         $$.c = decl.c + 
+                $1.c[0] + "arguments" + "@" + "0" + "[@]" + "=" + "^"; 
                 
          if( $1.valor_default.size() > 0 ) {
            // Gerar código para testar valor default.
@@ -237,9 +248,8 @@ PARAMs : PARAMs ',' PARAM
        }
      ;
      
-// --- CORREÇÃO 3: 'PARAM' agora só passa atributos, 'PARAMs' faz a declaração ---
 PARAM : ID 
-      { $$ = $1; // Passa os atributos do ID (linha, coluna, nome)
+      { $$ = $1; 
         $$.n_args = 1;
         $$.valor_default.clear(); }
     | ID '=' E
@@ -351,8 +361,6 @@ CMD_IF : IF '(' E ')' CMD
 LVALUE : ID 
        ;
        
-// --- CORREÇÃO 6: Usando a regra LVALUEPROP exata que você pediu ---
-// --- E corrigindo para usar .c[0] para nomes de ID ---
 LVALUEPROP : LVALUEPROP '[' E ']'
             { $$.c = $1.c + "[@]" + $3.c; } // obj.prop[idx]
            | LVALUEPROP '.' ID  
@@ -362,10 +370,8 @@ LVALUEPROP : LVALUEPROP '[' E ']'
            | F '.' ID  
             { $$.c = $1.c  + $3.c[0] ; } // foo().prop
            | LVALUE '[' E ']'
-            // --- CORREÇÃO C++: Mudado $1.c[0] para $1.c para iniciar com vector ---
             { $$.c = $1.c + "@" + $3.c; } // var[idx]
            | LVALUE '.' ID  
-            // --- CORREÇÃO C++: Mudado $1.c[0] para $1.c para iniciar com vector ---
             { $$.c = $1.c + "@"  + $3.c[0] ; } // var.prop
            ;
 
@@ -382,27 +388,25 @@ LISTVAL : E
 
 ATRIB
   : LVALUE '=' ATRIB
-    { checa_simbolo( $1.c[0], true ); $$.c = $1.c[0] + $3.c + "="; }
+    { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $3.c + "="; }
   | LVALUE MAIS_IGUAL ATRIB 
-    { checa_simbolo( $1.c[0], true ); $$.c = $1.c[0] + $1.c[0] + "@" + $3.c + "+" + "="; }
+    { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $1.c + "@" + $3.c + "+" + "="; }
   | LVALUE MENOS_IGUAL ATRIB 
-    { checa_simbolo( $1.c[0], true ); $$.c = $1.c[0] + $1.c[0] + "@" + $3.c + "-" + "="; }
+    { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $1.c + "@" + $3.c + "-" + "="; }
   | LVALUEPROP '=' ATRIB
     { $$.c = $1.c + $3.c + "[=]"; }
   | LVALUEPROP MAIS_IGUAL ATRIB 
     { $$.c = $1.c + $1.c + "[@]" + $3.c + "+" + "[=]"; }
   | LVALUE '=' '{' '}'
-      // --- CORREÇÃO C++: Mudado $1.c[0] para $1.c para iniciar com vector ---
       { checa_simbolo( $1.c[0], true ); $$.c = $1.c + "{}" + "="; }
   | LVALUEPROP '=' '{' '}'
-      { $$.c = $1.c + "{}" + "[=]"; } // Não precisa checar LVALUEPROP
+      { $$.c = $1.c + "{}" + "[=]"; } 
   | E 
   ;
 
 E : LVALUEPROP
     { $$.c = $1.c + "[@]"; }
   | LVALUE
-      // --- CORREÇÃO C++: Mudado $1.c[0] para $1.c para iniciar com vector ---
       { checa_simbolo( $1.c[0], false ); $$.c = $1.c + "@"; }
   | E IGUAL E
     { $$.c = $1.c + $3.c + $2.c; }
@@ -429,24 +433,19 @@ E : LVALUEPROP
   ;
 
 UN :  MAIS_MAIS LVALUE 
-    // --- CORREÇÃO C++: Mudado $2.c[0] para $2.c para iniciar com vector ---
-    {$$.c = $2.c + $2.c[0] + "@" + "1" + "+" + "=";}
+    {$$.c = $2.c + $2.c + "@" + "1" + "+" + "=";}
     | MENOS_MENOS LVALUE 
-        // --- CORREÇÃO C++: Mudado $2.c[0] para $2.c para iniciar com vector ---
-        {$$.c = $2.c + $2.c[0] + "@" + "1" + "-" + "=";}
+        {$$.c = $2.c + $2.c + "@" + "1" + "-" + "=";}
     | LVALUE MAIS_MAIS 
-        // --- CORREÇÃO C++: Mudado $1.c[0] para $1.c para iniciar com vector ---
-        {$$.c = $1.c + "@" + $1.c[0] + $1.c[0] + "@" + "1" + "+" + "=" + "^";}
+        {$$.c = $1.c + "@" + $1.c + $1.c + "@" + "1" + "+" + "=" + "^";}
     | LVALUE MENOS_MENOS 
-        // --- CORREÇÃO C++: Mudado $1.c[0] para $1.c para iniciar com vector ---
-        {$$.c = $1.c + "@" + $1.c[0] + $1.c[0] + "@" + "1" + "-" + "=" + "^";}
+        {$$.c = $1.c + "@" + $1.c + $1.c + "@" + "1" + "-" + "=" + "^";}
     | MAIS_MAIS LVALUEPROP 
         {$$.c = $2.c + $2.c + "[@]" + "1" + "+" + "[=]";}
     | MENOS_MENOS LVALUEPROP 
-        {$$.c = $2.c + $2.c + "[@]" + "1" + "-" + "[=]";} // Corrigido de '+' para '-'
+        {$$.c = $2.c + $2.c + "[@]" + "1" + "-" + "[=]";} 
     | LVALUEPROP MAIS_MAIS 
         {$$.c = $1.c + "[@]" + $1.c + $1.c + "[@]" + "1" + "+" + "[=]" + "^";}
-    // --- CORREÇÃO 8: Removido o 's' solto daqui ---
     | LVALUEPROP MENOS_MENOS 
         {$$.c = $1.c + "[@]" + $1.c + $1.c + "[@]" + "1" + "-" + "[=]" + "^";}
     | F
@@ -455,6 +454,7 @@ UN :  MAIS_MAIS LVALUE
 F :   CDOUBLE
     | CINT
     | CSTRING
+    | CBOOL
     | '(' E ')'
       { $$.c = $2.c; }
     | LIST
@@ -463,67 +463,65 @@ F :   CDOUBLE
     | CHAMA_FUNC
   ;
 
-/* --- CORREÇÃO: Trocando '~' (ret) por '$' (call) --- */
 CHAMA_FUNC : ID '(' LISTA_ARGS ')' 
               { 
-                /* $3.c agora é (arg_code) + (count) */
                 $$.c = $3.c + // 1. Empilha args e contagem
                        $1.c[0] + "@" + // 2. Empilha objeto da função (lendo da var)
                   
-                       "$" + // 6. CHAMA (a instrução '$' do seu exemplo)
-                       "^";
+                       "$"  // 6. CHAMA (a instrução '$')
+                       ;
               }
             | LVALUEPROP '(' LISTA_ARGS ')' 
               { 
                 string lbl_retorno = gera_label( "retorno_funcao" );
                 $$.c = $3.c + // 1. Empilha args e contagem
                        $1.c + "[@]" + // 2. Empilha objeto da função (LVALUEPROP + [@])
-                        "$" + // 6. CHAMA (a instrução '$')
-                        "^";
+                        "$"  // 6. CHAMA (a instrução '$')
+                        ;
               }
     
     | '(' E ')' '(' LISTA_ARGS ')' 
             { 
               string lbl_retorno = gera_label( "retorno_funcao" );
-              $$.c = $5.c + // 1. Empilha args e contagem
-                   $2.c + // 2. Empilha objeto da função (resultado de E)
-                    "@" +
-                   "$" + // 6. CHAMA (a instrução '$') + "^";
-                    "^";
+              $$.c = $5.c + 
+                   $2.c + 
+                    //"@" +
+                   "$"  // 6. CHAMA (a instrução '$') + "^";
+                    ;
 
            }
           ;
 
 LISTA_ARGS : ARGs
            { 
-             // $1.c tem o código dos argumentos
-             // $1.n_args tem a contagem
-             // Adiciona a contagem no final
              $$.c = $1.c + to_string( $1.n_args ); 
              $$.n_args = $1.n_args;
            }
-           | { 
-               // Sem argumentos. Empilha a contagem "0".
-               $$.c = vector<string>{"0"}; 
-               $$.n_args = 0; 
+         | ARGs ',' 
+           {
+             $$.c = $1.c + to_string( $1.n_args ); 
+             $$.n_args = $1.n_args;
+           }
+           | 
+           { 
+              $$.c = vector<string>{"0"}; 
+              $$.n_args = 0; 
            }
            ;
 
 ARGs : E
       { 
-        $$.c = $1.c;     // É o código para o primeiro argumento
-        $$.n_args = 1;   // A contagem é 1
+        $$.c = $1.c;     
+        $$.n_args = 1;   
       } 
     | ARGs ',' E  
       { 
-        // Concatena o código do novo argumento
         $$.c = $1.c + $3.c; 
-        // Incrementa a contagem
         $$.n_args = $1.n_args + 1; 
       }
     ;
 
-/* Esta regra não será mais usada, mas pode deixar */
+/* Esta regra não será mais usada */
 ARG : E
     ;
   
@@ -531,16 +529,12 @@ ARG : E
 
 #include "lex.yy.c"
 
-// --- CORREÇÃO 2: Implementação de 'busca_simbolo' ---
 Simbolo* busca_simbolo( string nome ) {
-    // Procura do escopo mais interno (fim do vetor) para o mais externo (início)
     for( int i = ts.size() - 1; i >= 0; i-- ) {
         if( ts[i].count( nome ) > 0 ) {
-            // Encontrou o símbolo
             return &ts[i][nome];
         }
     }
-    // Não encontrou em nenhum escopo
     return nullptr;
 }
 
@@ -559,7 +553,7 @@ Atributos declara_var( TipoDecl tipo, Atributos atrib ) {
         ts.back()[nome_var].linha = atrib.linha;
         ts.back()[nome_var].coluna = atrib.coluna;
         ts.back()[nome_var].tipo = tipo;
-        atrib.c = atrib.c;
+        atrib.c.pop_back();
       }
     }
     else{//declara var
@@ -602,7 +596,6 @@ void checa_simbolo( string nome, bool modificavel ) {
 }
 
 void yyerror( const char* st ) {
-  // --- CORREÇÃO C++: Removido o 'A' que causava erro de compilação ---
   cerr << st << endl; 
    cerr << "Proximo a: " << yytext << endl;
    exit( 1 );
