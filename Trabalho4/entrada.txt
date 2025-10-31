@@ -1,14 +1,10 @@
-var a, b = [];
-const c = -1;
-b[0] = true;
-function print(x) { x asm{println # undefined};
-  0 asm{undefined .};
-  return 0;
-} 
-if( b[0] ) { let a = -1; {
-   let b = { };
-    b.m = 9;
-    print( b ); 
-  }
-  a = b;
+function f( x ) {
+  let b = f;
+  const h = [ ];
+  f = x;
+  return b ;
 }
+
+let a;
+let g = f( a = [ ], { 
+} );

@@ -152,8 +152,62 @@ let y = 0.01, a = sqr( 5.2, 7, );
 |{ a: 27.05; sqr: { &funcao: ##; }; undefined: undefined; y: 0.01; }|
 === Pilha ===
 
-9: AINDA SEM 
-10: AINDA SEM
+9: 
+--- Input ---
+function f(x) { 
+  if( x % 2 == 0 ) { 
+    let x = 1;
+
+    function g() { 
+      {
+        return 3.1 + x++; 
+        1; 
+      }  
+    }
+
+    for( let i = 0; i < 5; i++ ) {     
+      g();
+    }
+    return g() + x;
+    let v;
+  }
+  else 
+    return x; 
+}
+
+let a = f(4);
+let b = f(3);
+
+--- Expected output (exact text)---
+=== Console ===
+=== Vars ===
+|{ a: 16.1; b: 3; f: { &funcao: ##; }; undefined: undefined; }|
+=== Pilha ===
+
+10: 
+
+--- Input ---
+
+let x = 0;
+
+function f( a, b ) {
+  let y = a++ * --b;
+  x += ++a*10 + b---a++;
+
+  return y;
+}
+
+let y = [], i = 2;
+y[2] = 2;
+y[3] = 4;
+let c;
+{ c = f( 7, y[++y[i++]]-- ); }
+
+--- Expected output (exact text)---
+=== Console ===
+=== Vars ===
+|{ c: 21; f: { &funcao: ##; }; i: 3; undefined: undefined; x: 84; y: [ 0: undefined; 1: undefined; 2: 3; 3: 3; ]; }|
+=== Pilha ===
 
 11: ok
 

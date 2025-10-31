@@ -44,7 +44,7 @@ struct Simbolo {
 vector< map< string, Simbolo > > ts = { map< string, Simbolo >{} }; 
 vector<string> funcoes;
 
-vector<int> pilha_funcoes;
+vector<int> blocos_alinhados_em_funcao = {0};
 
 
 Atributos declara_var( TipoDecl tipo, Atributos atrib );
@@ -97,6 +97,19 @@ vector<string> operator+( string a, vector<string> b ) {
   return vector<string>{ a } + b;
 }
 
+// Concatena dois vetores
+vector<string>& operator+=(vector<string>& a, const vector<string>& b) {
+  a.insert(a.end(), b.begin(), b.end());
+  return a;
+}
+
+// Adiciona uma string ao vetor
+vector<string>& operator+=(vector<string>& a, const string& b) {
+  a.push_back(b);
+  return a;
+}
+
+
 vector<string> resolve_enderecos( vector<string> entrada ) {
   map<string,int> label;
   vector<string> saida;
@@ -128,6 +141,9 @@ void print( vector<string> codigo ) {
     
   cout << endl;  
 }
+
+void empilha_escopo_novo();
+void desempilha_escopo();
 %}
 
 
@@ -143,7 +159,7 @@ void print( vector<string> codigo ) {
 %left '+' '-'
 %left '*' '/' '%'
 %right MAIS_MAIS 
-%left '[' '(' 
+%right '[' '(' 
 %left '.'
 
 
@@ -175,32 +191,67 @@ CMD : CMD_LET ';'
       { $$.clear(); }
     ;
 
-BLOCO : '{' EMPILHA_TS CMDs '}' 
-        { $$.c = "<{" + $3.c + "}>" ; ts.pop_back(); 
-          //pilha_funcoes.back()++;
+BLOCO : '{' START_BLOCO CMDs '}' END_BLOCO
+        { //if ($3.c.size() > 0)
+            $$.c = "<{" + $3.c + "}>" ; 
+          //else
+            //$$.c = $3.c;
         }
        ;
-       
-CMD_RET : RETURN E
+
+START_BLOCO : {empilha_escopo_novo();}
+
+END_BLOCO : {desempilha_escopo();}
+       ;
+
+CMD_RET : RETURN 
           { 
-            /*int quant_ret = pilha_funcoes.back();
-            pilha_funcoes.pop_back();
-            vector<string> retornos;
-            for( int i = 0; i < quant_ret; i++ )
-                retornos.push_back( "}>" ); erro de seg nao é aqui*/
-            $$.c = $2.c +  vector<string>{ "'&retorno'", "@", "~" }; 
+            $$.c = vector<string>{"undefined"}; /* 1. Empilha undefined */
             
-            }
-         ;
+            for( int i = 0; i <  blocos_alinhados_em_funcao.back(); i++ )
+                $$.c = $$.c + "}>"; /* 2. Fecha blocos aninhados */
+            
+            $$.c =  $$.c + vector<string>{ "'&retorno'", "@", "~" }; /* 3. Instruções de retorno */
+          }
+      | RETURN E 
+          { 
+            $$.c = $2.c; /* 1. Empilha o valor da expressão E */
+            
+            for( int i = 0; i <  blocos_alinhados_em_funcao.back(); i++ )
+                $$.c = $$.c + "}>"; /* 2. Fecha blocos aninhados */
+            
+            /* 3. Instruções de retorno (NÃO adicione $2.c de novo) */
+            $$.c = $$.c + vector<string>{ "'&retorno'", "@", "~" }; 
+          }
+        ;
+
 CMD_ASM : E ASM { $$.c = $1.c + $2.c + "^"; }
         ;
 
-EMPILHA_TS : { ts.push_back( map< string, Simbolo >{} ); } 
+EMPILHA_TS_FUNC : { ts.push_back( map< string, Simbolo >{} ); 
+                blocos_alinhados_em_funcao.push_back(0);} 
            ;
-    
+
+DESEMPILHA_TS_FUNC : { ts.pop_back(); 
+                      blocos_alinhados_em_funcao.pop_back();} 
+                      ;
+
+CMD_FUNC : FUNCTION NOME_FUNCAO '(' EMPILHA_TS_FUNC LISTA_PARAMs ')' '{' CMDs '}' DESEMPILHA_TS_FUNC 
+           { 
+             /* Note que os índices mudaram: NOME_FUNCAO é $2, LISTA_PARAMs é $5, CMDs é $8 */
+             string definicao_lbl_endereco_funcao = ":" + $2.endereco_funcao;
+             
+             $$.c = $2.c ; /* Código de NOME_FUNCAO (declara var, atribui obj função) */
+
+             funcoes = funcoes + definicao_lbl_endereco_funcao + $5.c + $8.c +
+                         "undefined" + "@" + "'&retorno'" + "@"+ "~";
+             
+           }
+         ;
+/*    
 CMD_FUNC : FUNCTION NOME_FUNCAO '(' EMPILHA_TS LISTA_PARAMs ')' '{' CMDs '}'
            { 
-             //pilha_funcoes.push_back(1);
+             blocos_alinhados_em_funcao.push_back(0);
              string definicao_lbl_endereco_funcao = ":" + $2.endereco_funcao;
              
              $$.c = $2.c ;
@@ -210,12 +261,20 @@ CMD_FUNC : FUNCTION NOME_FUNCAO '(' EMPILHA_TS LISTA_PARAMs ')' '{' CMDs '}'
              ts.pop_back(); 
              
            }
-         ;
+         ;*/
          
 NOME_FUNCAO : ID 
-            { string endereco_funcao = gera_label( "func_" + $1.c[0] );
-              Atributos decl = declara_var( Var, $1 ); // Declara a função no escopo atual
-              $$.c = $1.c + "&" + $1.c + "{}" + "=" + "'&funcao'" + $$.endereco_funcao + "[=]" + "^"; }
+            { 
+              string endereco_funcao = gera_label( "func_" + $1.c[0] );
+              $$.endereco_funcao = endereco_funcao; /* 1. Salva o label para CMD_FUNC usar */
+              
+              Atributos decl = declara_var( Var, $1 ); // 2. Declara a variável
+              
+              /* 3. Gera código usando decl.c (que pode ou não ter '&') e a var local 'endereco_funcao' */
+              $$.c = decl.c +                                    /* 'foo &' ou nada se for redeclaração */
+                     $1.c + "{}" + "="  + "'&funcao'" + endereco_funcao +  /* 'foo '&funcao' func_foo_1' ... */
+                     "[=]" + "^";                              /* ... '[=] ^' (atribui prop) */
+            }
           ;
 
 LISTA_PARAMs : PARAMs
@@ -223,31 +282,48 @@ LISTA_PARAMs : PARAMs
            | { $$.clear(); } 
            ;
            
-PARAMs : PARAMs ',' PARAM  
+PARAMs : PARAMs ',' PARAM
        { 
-         Atributos decl = declara_var( Let, $3 ); // Declara o parâmetro no escopo da função
-         $$.c = $1.c + decl.c + 
-                $3.c[0] + "arguments" + "@" + to_string( $1.n_args ) 
-                + "[@]" + "=" + "^"; 
-                
-         if( $3.valor_default.size() > 0 ) {
-           // Gerar código para testar valor default.
+         Atributos decl = declara_var(Let, $3); // Declara o parâmetro no escopo da função
+         
+         string idx = to_string($1.n_args); // índice do parâmetro
+         string nome = $3.c[0]; // nome da variável
+
+         // Código base: associar argumento à variável
+         $$.c = $1.c + $3.c + "&" + $3.c + "arguments" + "@" + idx + "[@]" + "=" + "^" ;
+
+         // Se tiver valor default, gerar código adicional
+         if ($3.valor_default.size() > 0) {
+            string lbl_fim_default = gera_label( "fim_default_if" );
+            $$.c += $3.c + "@" + "undefined" + "@" + "==" + "!" + lbl_fim_default + "?" + $3.c +
+                     $3.valor_default + "=" + "^" +
+                     define_label(lbl_fim_default);
          }
-         $$.n_args = $1.n_args + $3.n_args; 
+
+         $$.n_args = $1.n_args + 1; 
        }
-     | PARAM 
+     | PARAMs ','
+     | PARAM
        { 
-         Atributos decl = declara_var( Let, $1 ); // Declara o parâmetro no escopo da função
+         Atributos decl = declara_var(Let, $1); // Declara o parâmetro
+         
+         string nome = $1.c[0];
+
+         // Código base para o primeiro parâmetro
          $$.c = decl.c + 
-                $1.c[0] + "arguments" + "@" + "0" + "[@]" + "=" + "^"; 
-                
-         if( $1.valor_default.size() > 0 ) {
-           // Gerar código para testar valor default.
+                $1.c + "arguments" +  "@" + "0" + "[@]" + "=" + "^";
+
+         if ($1.valor_default.size() > 0) {
+          string lbl_fim_default = gera_label( "fim_default_if" );
+           $$.c += $1.c + "@" + "undefined" + "@" + "==" + "!" + lbl_fim_default + "?" + $1.c +
+                     $1.valor_default + "=" + "^" +
+                     define_label(lbl_fim_default);
          }
-         $$.n_args = $1.n_args; 
+
+         $$.n_args = 1; 
        }
      ;
-     
+
 PARAM : ID 
       { $$ = $1; 
         $$.n_args = 1;
@@ -383,7 +459,7 @@ LISTVALS : LISTVAL ',' LISTVALS   { $$.c = $1.c + $3.c; }
          | LISTVAL
          ;
 
-LISTVAL : E
+LISTVAL : ATRIB
         ;
 
 ATRIB
@@ -407,7 +483,8 @@ ATRIB
 E : LVALUEPROP
     { $$.c = $1.c + "[@]"; }
   | LVALUE
-      { checa_simbolo( $1.c[0], false ); $$.c = $1.c + "@"; }
+      { //checa_simbolo( $1.c[0], false ); 
+        $$.c = $1.c + "@"; }
   | E IGUAL E
     { $$.c = $1.c + $3.c + $2.c; }
   | E '<' E
@@ -509,12 +586,12 @@ LISTA_ARGS : ARGs
            }
            ;
 
-ARGs : E
+ARGs : ATRIB
       { 
         $$.c = $1.c;     
         $$.n_args = 1;   
       } 
-    | ARGs ',' E  
+    | ARGs ',' ATRIB  
       { 
         $$.c = $1.c + $3.c; 
         $$.n_args = $1.n_args + 1; 
@@ -536,6 +613,23 @@ Simbolo* busca_simbolo( string nome ) {
         }
     }
     return nullptr;
+}
+
+void empilha_escopo_novo(){
+    ts.push_back( map< string, Simbolo >{} ); 
+    if (!blocos_alinhados_em_funcao.empty())
+      blocos_alinhados_em_funcao.back()++;
+}
+
+void desempilha_escopo(){
+    if (!ts.empty()){
+      ts.pop_back();
+      if (!blocos_alinhados_em_funcao.empty())
+        blocos_alinhados_em_funcao.back()--;
+    } else {
+      cerr << "Erro: Não é permitido desempilhar o escopo global" << endl;
+      exit(1);
+    }
 }
 
 
