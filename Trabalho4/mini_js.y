@@ -302,7 +302,6 @@ PARAMs : PARAMs ',' PARAM
 
          $$.n_args = $1.n_args + 1; 
        }
-     | PARAMs ','
      | PARAM
        { 
          Atributos decl = declara_var(Let, $1); // Declara o parâmetro
@@ -372,13 +371,13 @@ LET_VARs : LET_VAR ',' LET_VARs { $$.c = $1.c + $3.c; }
          | LET_VAR
          ;
 
-LET_VAR : LVALUE  
+LET_VAR : ID  
           { $$.c = declara_var( Let, $1 ).c; }
-        | LVALUE '=' E
+        | ID '=' E
           { 
             $$.c = declara_var( Let, $1 ).c + // ex: a &
                    $1.c[0] + $3.c + "=" + "^"; } // ex: a 1 = ^
-        | LVALUE '=' '{' '}'
+        | ID '=' '{' '}'
           {
             $$.c = declara_var( Let, $1 ).c +
             $1.c[0] + "{}" + "=" + "^"; }
@@ -391,12 +390,12 @@ VAR_VARs : VAR_VAR ',' VAR_VARs { $$.c = $1.c + $3.c; }
          | VAR_VAR
          ;
 
-VAR_VAR : LVALUE  
+VAR_VAR : ID  
           { $$.c = declara_var( Var, $1 ).c; }
-        | LVALUE '=' E
+        | ID '=' E
           {  $$.c = declara_var( Var, $1 ).c + 
                     $1.c[0] + $3.c + "=" + "^"; }
-        | LVALUE '=' '{' '}'
+        | ID '=' '{' '}'
           {
             $$.c = declara_var( Var, $1 ).c +
             $1.c[0] + "{}" + "=" + "^"; }
@@ -409,12 +408,12 @@ CONST_VARs : CONST_VAR ',' CONST_VARs { $$.c = $1.c + $3.c; }
            | CONST_VAR
            ;
 
-CONST_VAR : LVALUE  
+CONST_VAR : ID  
             { $$.c = declara_var( Const, $1 ).c; }
-          | LVALUE '=' E
+          | ID '=' E
             { $$.c = declara_var( Const, $1 ).c + 
                      $1.c[0] + $3.c + "=" + "^"; }
-          | LVALUE '=' '{' '}'
+          | ID '=' '{' '}'
             {
               $$.c = declara_var( Const, $1 ).c +
               $1.c[0] + "{}" + "=" + "^"; }
@@ -434,8 +433,6 @@ CMD_IF : IF '(' E ')' CMD
           }
        ;
         
-LVALUE : ID 
-       ;
        
 LVALUEPROP : LVALUEPROP '[' E ']'
             { $$.c = $1.c + "[@]" + $3.c; } // obj.prop[idx]
@@ -445,9 +442,9 @@ LVALUEPROP : LVALUEPROP '[' E ']'
             { $$.c = $1.c + $3.c; } // foo()[idx]
            | F '.' ID  
             { $$.c = $1.c  + $3.c[0] ; } // foo().prop
-           | LVALUE '[' E ']'
+           | ID '[' E ']'
             { $$.c = $1.c + "@" + $3.c; } // var[idx]
-           | LVALUE '.' ID  
+           | ID '.' ID  
             { $$.c = $1.c + "@"  + $3.c[0] ; } // var.prop
            ;
 
@@ -459,21 +456,21 @@ LISTVALS : LISTVAL ',' LISTVALS   { $$.c = $1.c + $3.c; }
          | LISTVAL
          ;
 
-LISTVAL : ATRIB
+LISTVAL : E
         ;
 
 ATRIB
-  : LVALUE '=' ATRIB
+  : ID '=' ATRIB
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $3.c + "="; }
-  | LVALUE MAIS_IGUAL ATRIB 
+  | ID MAIS_IGUAL ATRIB 
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $1.c + "@" + $3.c + "+" + "="; }
-  | LVALUE MENOS_IGUAL ATRIB 
+  | ID MENOS_IGUAL ATRIB 
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $1.c + "@" + $3.c + "-" + "="; }
   | LVALUEPROP '=' ATRIB
     { $$.c = $1.c + $3.c + "[=]"; }
   | LVALUEPROP MAIS_IGUAL ATRIB 
     { $$.c = $1.c + $1.c + "[@]" + $3.c + "+" + "[=]"; }
-  | LVALUE '=' '{' '}'
+  | ID '=' '{' '}'
       { checa_simbolo( $1.c[0], true ); $$.c = $1.c + "{}" + "="; }
   | LVALUEPROP '=' '{' '}'
       { $$.c = $1.c + "{}" + "[=]"; } 
@@ -482,7 +479,7 @@ ATRIB
 
 E : LVALUEPROP
     { $$.c = $1.c + "[@]"; }
-  | LVALUE
+  | ID
       { //checa_simbolo( $1.c[0], false ); 
         $$.c = $1.c + "@"; }
   | E IGUAL E
@@ -509,13 +506,13 @@ E : LVALUEPROP
     { $$.c = $1.c; }
   ;
 
-UN :  MAIS_MAIS LVALUE 
+UN :  MAIS_MAIS ID 
     {$$.c = $2.c + $2.c + "@" + "1" + "+" + "=";}
-    | MENOS_MENOS LVALUE 
+    | MENOS_MENOS ID 
         {$$.c = $2.c + $2.c + "@" + "1" + "-" + "=";}
-    | LVALUE MAIS_MAIS 
+    | ID MAIS_MAIS 
         {$$.c = $1.c + "@" + $1.c + $1.c + "@" + "1" + "+" + "=" + "^";}
-    | LVALUE MENOS_MENOS 
+    | ID MENOS_MENOS 
         {$$.c = $1.c + "@" + $1.c + $1.c + "@" + "1" + "-" + "=" + "^";}
     | MAIS_MAIS LVALUEPROP 
         {$$.c = $2.c + $2.c + "[@]" + "1" + "+" + "[=]";}
@@ -586,12 +583,12 @@ LISTA_ARGS : ARGs
            }
            ;
 
-ARGs : ATRIB
+ARGs : E
       { 
         $$.c = $1.c;     
         $$.n_args = 1;   
       } 
-    | ARGs ',' ATRIB  
+    | ARGs ',' E  
       { 
         $$.c = $1.c + $3.c; 
         $$.n_args = $1.n_args + 1; 

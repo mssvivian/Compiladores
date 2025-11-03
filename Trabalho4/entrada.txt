@@ -1,10 +1,5 @@
-function f( x ) {
-  let b = f;
-  const h = [ ];
-  f = x;
-  return b ;
-}
-
-let a;
-let g = f( a = [ ], { 
-} );
+let a = [];  
+let i = 1;         
+if (true) {}           
+function f() {}       
+a[i++]++;             
