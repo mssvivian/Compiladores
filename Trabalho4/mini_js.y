@@ -158,18 +158,20 @@ void desempilha_escopo();
 %nonassoc '<' '>' ME_IG MA_IG
 %left '+' '-'
 %left '*' '/' '%'
-%right MAIS_MAIS MENOS_MENOS
-%left '.'
-%right '[' '(' 
+
+%right '[' '('
+%left '.' 
+%left MAIS_MAIS MENOS_MENOS
 
 
 %%
 
 S : CMDs { print( resolve_enderecos( $1.c + "." + funcoes ) ); }
+  | { $$.clear(); }
   ;
 
 CMDs : CMDs CMD  { $$.c = $1.c + $2.c; }
-     |           { $$.clear(); }
+     | CMD
      ;
            
 
@@ -184,7 +186,7 @@ CMD : CMD_LET ';'
     | CMD_WHILE
     | CMD_RET ';'
     | CMD_ASM ';'
-    | E ';'
+    | ATRIB ';'
       { $$.c = $1.c + "^"; } 
     | BLOCO
     | ';'
@@ -477,8 +479,10 @@ ATRIB
 
 E : ID
     { $$.c = $1.c + "@"; }
+  | LVALUEPROP
+    { $$.c = $1.c + "[@]"; }
   | E IGUAL E
-    { $$.c = $1.c + $3.c + $2.c; }
+    { $$.c = $1.c + $3.c + $2.c;}
   | E '<' E
     { $$.c = $1.c + $3.c + $2.c; }
   | E '>' E
@@ -527,7 +531,7 @@ F :   CDOUBLE
     | '(' E ')'
       { $$.c = $2.c; }
     | LIST
-    | '(' '{' '}' ')'
+    | '{' '}' 
       { $$.c = vector<string>{"{}"}; }
     | CHAMA_FUNC
   ;
@@ -565,12 +569,12 @@ LISTA_ARGS : ARGs
            }
            ;
 
-ARGs : E
+ARGs : ATRIB
       { 
         $$.c = $1.c;     
         $$.n_args = 1;   
       } 
-    | ARGs ',' E  
+    | ARGs ',' ATRIB  
       { 
         $$.c = $1.c + $3.c; 
         $$.n_args = $1.n_args + 1; 
