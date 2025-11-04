@@ -1,5 +1,6 @@
 let a = [];  
-let i = 1;         
+let i = 1;
+a[2] = 0; 
 if (true) {}           
 function f() {}       
 a[i++]++;             

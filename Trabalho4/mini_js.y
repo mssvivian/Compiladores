@@ -158,9 +158,9 @@ void desempilha_escopo();
 %nonassoc '<' '>' ME_IG MA_IG
 %left '+' '-'
 %left '*' '/' '%'
-%right MAIS_MAIS 
-%right '[' '(' 
+%right MAIS_MAIS MENOS_MENOS
 %left '.'
+%right '[' '(' 
 
 
 %%
@@ -168,7 +168,7 @@ void desempilha_escopo();
 S : CMDs { print( resolve_enderecos( $1.c + "." + funcoes ) ); }
   ;
 
-CMDs : CMDs CMD  { $$.c = $1.c + $2.c; };
+CMDs : CMDs CMD  { $$.c = $1.c + $2.c; }
      |           { $$.clear(); }
      ;
            
@@ -184,7 +184,7 @@ CMD : CMD_LET ';'
     | CMD_WHILE
     | CMD_RET ';'
     | CMD_ASM ';'
-    | ATRIB ';'
+    | E ';'
       { $$.c = $1.c + "^"; } 
     | BLOCO
     | ';'
@@ -198,7 +198,7 @@ BLOCO : '{' START_BLOCO CMDs '}' END_BLOCO
             //$$.c = $3.c;
         }
        ;
-
+       
 START_BLOCO : {empilha_escopo_novo();}
 
 END_BLOCO : {desempilha_escopo();}
@@ -374,13 +374,11 @@ LET_VARs : LET_VAR ',' LET_VARs { $$.c = $1.c + $3.c; }
 LET_VAR : ID  
           { $$.c = declara_var( Let, $1 ).c; }
         | ID '=' E
-          { 
-            $$.c = declara_var( Let, $1 ).c + // ex: a &
-                   $1.c[0] + $3.c + "=" + "^"; } // ex: a 1 = ^
-        | ID '=' '{' '}'
+          { $$.c = declara_var( Let, $1 ).c + $1.c[0] + $3.c + "=" + "^"; } // ex: a 1 = ^
+     /*   | ID '=' '{' '}'
           {
             $$.c = declara_var( Let, $1 ).c +
-            $1.c[0] + "{}" + "=" + "^"; }
+            $1.c[0] + "{}" + "=" + "^"; } */
         ;
   
 CMD_VAR : VAR VAR_VARs { $$.c = $2.c; }
@@ -393,12 +391,11 @@ VAR_VARs : VAR_VAR ',' VAR_VARs { $$.c = $1.c + $3.c; }
 VAR_VAR : ID  
           { $$.c = declara_var( Var, $1 ).c; }
         | ID '=' E
-          {  $$.c = declara_var( Var, $1 ).c + 
-                    $1.c[0] + $3.c + "=" + "^"; }
-        | ID '=' '{' '}'
+          {  $$.c = declara_var( Var, $1 ).c + $1.c[0] + $3.c + "=" + "^"; }
+     /*   | ID '=' '{' '}'
           {
             $$.c = declara_var( Var, $1 ).c +
-            $1.c[0] + "{}" + "=" + "^"; }
+            $1.c[0] + "{}" + "=" + "^"; }*/
         ;
   
 CMD_CONST: CONST CONST_VARs { $$.c = $2.c; }
@@ -411,12 +408,11 @@ CONST_VARs : CONST_VAR ',' CONST_VARs { $$.c = $1.c + $3.c; }
 CONST_VAR : ID  
             { $$.c = declara_var( Const, $1 ).c; }
           | ID '=' E
-            { $$.c = declara_var( Const, $1 ).c + 
-                     $1.c[0] + $3.c + "=" + "^"; }
-          | ID '=' '{' '}'
+            { $$.c = declara_var( Const, $1 ).c + $1.c[0] + $3.c + "=" + "^"; }
+        /*  | ID '=' '{' '}'
             {
               $$.c = declara_var( Const, $1 ).c +
-              $1.c[0] + "{}" + "=" + "^"; }
+              $1.c[0] + "{}" + "=" + "^"; } */
           ;
   
 CMD_IF : IF '(' E ')' CMD
@@ -470,18 +466,17 @@ ATRIB
     { $$.c = $1.c + $3.c + "[=]"; }
   | LVALUEPROP MAIS_IGUAL ATRIB 
     { $$.c = $1.c + $1.c + "[@]" + $3.c + "+" + "[=]"; }
-  | ID '=' '{' '}'
+  | E
+  ;
+  /*| ID '=' '{' '}'
       { checa_simbolo( $1.c[0], true ); $$.c = $1.c + "{}" + "="; }
   | LVALUEPROP '=' '{' '}'
       { $$.c = $1.c + "{}" + "[=]"; } 
   | E 
-  ;
+  ; */
 
-E : LVALUEPROP
-    { $$.c = $1.c + "[@]"; }
-  | ID
-      { //checa_simbolo( $1.c[0], false ); 
-        $$.c = $1.c + "@"; }
+E : ID
+    { $$.c = $1.c + "@"; }
   | E IGUAL E
     { $$.c = $1.c + $3.c + $2.c; }
   | E '<' E
@@ -506,8 +501,8 @@ E : LVALUEPROP
     { $$.c = $1.c; }
   ;
 
-UN :  MAIS_MAIS ID 
-    {$$.c = $2.c + $2.c + "@" + "1" + "+" + "=";}
+UN  : MAIS_MAIS ID 
+        {$$.c = $2.c + $2.c + "@" + "1" + "+" + "=";}
     | MENOS_MENOS ID 
         {$$.c = $2.c + $2.c + "@" + "1" + "-" + "=";}
     | ID MAIS_MAIS 
@@ -539,32 +534,19 @@ F :   CDOUBLE
 
 CHAMA_FUNC : ID '(' LISTA_ARGS ')' 
               { 
-                $$.c = $3.c + // 1. Empilha args e contagem
-                       $1.c[0] + "@" + // 2. Empilha objeto da função (lendo da var)
-                  
-                       "$"  // 6. CHAMA (a instrução '$')
-                       ;
+                $$.c = $3.c + $1.c[0] + "@" + "$" ;
               }
             | LVALUEPROP '(' LISTA_ARGS ')' 
               { 
                 string lbl_retorno = gera_label( "retorno_funcao" );
-                $$.c = $3.c + // 1. Empilha args e contagem
-                       $1.c + "[@]" + // 2. Empilha objeto da função (LVALUEPROP + [@])
-                        "$"  // 6. CHAMA (a instrução '$')
-                        ;
+                $$.c = $3.c + $1.c + "[@]" + "$" ;
               }
-    
-    | '(' E ')' '(' LISTA_ARGS ')' 
-            { 
-              string lbl_retorno = gera_label( "retorno_funcao" );
-              $$.c = $5.c + 
-                   $2.c + 
-                    //"@" +
-                   "$"  // 6. CHAMA (a instrução '$') + "^";
-                    ;
-
-           }
-          ;
+            | '(' E ')' '(' LISTA_ARGS ')' 
+              { 
+                string lbl_retorno = gera_label( "retorno_funcao" );
+                $$.c = $5.c + $2.c + "$" ;
+              }
+            ;
 
 LISTA_ARGS : ARGs
            { 
@@ -595,9 +577,6 @@ ARGs : E
       }
     ;
 
-/* Esta regra não será mais usada */
-ARG : E
-    ;
   
 %%
 
