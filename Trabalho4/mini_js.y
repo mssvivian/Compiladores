@@ -10,10 +10,12 @@ using namespace std;
 int linha = 1, coluna = 0; 
 
 struct Atributos {
-  vector<string> c; // Código
+  vector<string> c; // Código - vazio para LVALUEPROP
   string endereco_funcao;
   int linha = 0, coluna = 0;
 
+  vector<string> esq ; //usado para LVALUEPROP para separar E[E]
+  vector<string> dir ; //usado para LVALUEPROP sempre variaveis temporarias
   // Só para argumentos e parâmetros
   int n_args = 0;     
 
@@ -142,6 +144,15 @@ void print( vector<string> codigo ) {
   cout << endl;  
 }
 
+string gera_temp(string prefixo) {
+  static int n = 0;
+  return "temp_" + prefixo + to_string( ++n );
+}
+
+vector<string> to_inst(string st){
+    return vector<string>{st};
+}
+
 void empilha_escopo_novo();
 void desempilha_escopo();
 %}
@@ -189,6 +200,7 @@ CMD : CMD_LET ';'
     | ATRIB ';'
       { $$.c = $1.c + "^"; } 
     | BLOCO
+    
     | ';'
       { $$.clear(); }
     ;
@@ -433,17 +445,36 @@ CMD_IF : IF '(' E ')' CMD
         
        
 LVALUEPROP : LVALUEPROP '[' E ']'
-            { $$.c = $1.c + "[@]" + $3.c; } // obj.prop[idx]
+            { $$.c.clear(); 
+              $$.esq = $1.esq + $1.dir + "[@]";
+              $$.dir = $3.c;
+               } // obj.prop[idx]
            | LVALUEPROP '.' ID  
-            { $$.c = $1.c + "[@]"  + $3.c[0] ; } // obj.prop.prop
+            { $$.c.clear(); 
+              $$.esq = $1.esq + $1.dir + "[@]";
+              $$.dir = $3.c;
+               } // obj.prop.prop
            | F '[' E ']'
-            { $$.c = $1.c + $3.c; } // foo()[idx]
+             { $$.c.clear(); 
+              $$.esq = $1.c;
+              $$.dir = $3.c;
+               } // foo()[idx]
            | F '.' ID  
-            { $$.c = $1.c  + $3.c[0] ; } // foo().prop
+            { $$.c.clear(); 
+              $$.esq = $1.c;
+              $$.dir = $3.c;
+              } // criar temp e atribuir na variavel 
+              // foo().prop
            | ID '[' E ']'
-            { $$.c = $1.c + "@" + $3.c; } // var[idx]
+            { $$.c.clear(); 
+              $$.esq = $1.c + "@";
+              $$.dir = $3.c;
+              } // var[idx]
            | ID '.' ID  
-            { $$.c = $1.c + "@"  + $3.c[0] ; } // var.prop
+            { $$.c.clear(); 
+              $$.esq = $1.c + "@";
+              $$.dir = $3.c;
+               } // var.prop
            ;
 
 LIST  : '[' LISTVALS ']' { $$.c = $1.c + $2.c + $3.c; }
@@ -465,9 +496,25 @@ ATRIB
   | ID MENOS_IGUAL ATRIB 
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $1.c + "@" + $3.c + "-" + "="; }
   | LVALUEPROP '=' ATRIB
-    { $$.c = $1.c + $3.c + "[=]"; }
+    { $$.c = $1.esq + $1.dir + $3.c + "[=]"; }
   | LVALUEPROP MAIS_IGUAL ATRIB 
-    { $$.c = $1.c + $1.c + "[@]" + $3.c + "+" + "[=]"; }
+    { $$.c = $1.c + $1.c + "[@]" + $3.c + "+" + "[=]"; 
+          string esq = gera_temp("esq");
+          string dir = gera_temp("dir");
+          $$.c =  to_inst(esq) + "&" + esq + $1.esq + "=" + "^" +
+                  to_inst(dir) + "&" + dir + $1.dir + "=" + "^" +
+                  esq + "@" + dir + "@" +
+                  esq + "@" + dir + "@" + "[@]" +
+                  $3.c + "+" + "[=]" ;}
+  | LVALUEPROP MENOS_IGUAL ATRIB 
+    { $$.c = $1.c + $1.c + "[@]" + $3.c + "+" + "[=]"; 
+          string esq = gera_temp("esq");
+          string dir = gera_temp("dir");
+          $$.c =  to_inst(esq) + "&" + esq + $1.esq + "=" + "^" +
+                  to_inst(dir) + "&" + dir + $1.dir + "=" + "^" +
+                  esq + "@" + dir + "@" +
+                  esq + "@" + dir + "@" + "[@]" +
+                  $3.c + "-" + "[=]" ;}
   | E
   ;
   /*| ID '=' '{' '}'
@@ -480,7 +527,7 @@ ATRIB
 E : ID
     { $$.c = $1.c + "@"; }
   | LVALUEPROP
-    { $$.c = $1.c + "[@]"; }
+    { $$.c = $1.esq + $1.dir + "[@]"; }
   | E IGUAL E
     { $$.c = $1.c + $3.c + $2.c;}
   | E '<' E
@@ -514,13 +561,42 @@ UN  : MAIS_MAIS ID
     | ID MENOS_MENOS 
         {$$.c = $1.c + "@" + $1.c + $1.c + "@" + "1" + "-" + "=" + "^";}
     | MAIS_MAIS LVALUEPROP 
-        {$$.c = $2.c + $2.c + "[@]" + "1" + "+" + "[=]";}
+        { string esq = gera_temp("esq");
+          string dir = gera_temp("dir");
+          $$.c =  to_inst(esq) + "&" + esq + $2.esq + "=" + "^" +
+                  to_inst(dir) + "&" + dir + $2.dir + "=" + "^" +
+                  esq + "@" + dir + "@" +
+                  esq + "@" + dir + "@" + "[@]" +
+                  "1" + "+" + "[=]" ;} 
     | MENOS_MENOS LVALUEPROP 
-        {$$.c = $2.c + $2.c + "[@]" + "1" + "-" + "[=]";} 
+        {
+          string esq = gera_temp("esq");
+          string dir = gera_temp("dir");
+          $$.c =  to_inst(esq) + "&" + esq + $2.esq + "=" + "^" +
+                  to_inst(dir) + "&" + dir + $2.dir + "=" + "^" +
+                  esq + "@" + dir + "@" +
+                  esq + "@" + dir + "@" + "[@]" +
+                  "1" + "-" + "[=]" ;} 
     | LVALUEPROP MAIS_MAIS 
-        {$$.c = $1.c + "[@]" + $1.c + $1.c + "[@]" + "1" + "+" + "[=]" + "^";}
+        {
+         string esq = gera_temp("esq");
+         string dir = gera_temp("dir");
+         $$.c = to_inst(esq) + "&" + esq + $1.esq + "=" + "^" +
+                to_inst(dir) + "&" + dir + $1.dir + "=" + "^" +
+                esq + "@" + dir + "@" + "[@]" +
+                esq + "@" + dir + "@" +
+                esq + "@" + dir + "@" + "[@]" +
+                "1" + "+" + "[=]" + "^";
+        }
     | LVALUEPROP MENOS_MENOS 
-        {$$.c = $1.c + "[@]" + $1.c + $1.c + "[@]" + "1" + "-" + "[=]" + "^";}
+        {string esq = gera_temp("esq");
+         string dir = gera_temp("dir");
+         $$.c = to_inst(esq) + "&" + esq + $1.esq + "=" + "^" +
+                to_inst(dir) + "&" + dir + $1.dir + "=" + "^" +
+                esq + "@" + dir + "@" + "[@]" +
+                esq + "@" + dir + "@" +
+                esq + "@" + dir + "@" + "[@]" +
+                "1" + "-" + "[=]" + "^";}
     | F
     ;
 
@@ -543,7 +619,7 @@ CHAMA_FUNC : ID '(' LISTA_ARGS ')'
             | LVALUEPROP '(' LISTA_ARGS ')' 
               { 
                 string lbl_retorno = gera_label( "retorno_funcao" );
-                $$.c = $3.c + $1.c + "[@]" + "$" ;
+                $$.c = $3.c + $1.esq + $1.dir + "[@]" + "$" ;
               }
             | '(' E ')' '(' LISTA_ARGS ')' 
               { 
