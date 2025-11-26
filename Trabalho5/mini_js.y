@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 #include <sstream>
 
 using namespace std;
@@ -22,7 +23,13 @@ struct Atributos {
   int contador = 0; //contar parametros e argumentos
   
   // Só para valor default de argumento        
-  vector<string> valor_default; 
+  vector<string> valor_default;
+  
+  // Para funções anônimas e arrow functions
+  bool eh_lambda = false;  // true se for arrow function com expressão (sem bloco)
+  vector<string> captura; // variáveis capturadas (nomes)
+  set<string> parametros_funcao; // parâmetros da função para detecção de captura
+  set<string> variaveis_locais; // variáveis locais da função (não precisam captura)
 
   void clear() {
     c.clear();
@@ -30,6 +37,10 @@ struct Atributos {
     linha = 0;
     coluna = 0;
     n_args = 0;
+    eh_lambda = false;
+    captura.clear();
+    parametros_funcao.clear();
+    variaveis_locais.clear();
   }
 };
 
@@ -53,27 +64,6 @@ Atributos declara_var( TipoDecl tipo, Atributos atrib );
 void checa_simbolo( string nome, bool modificavel );
 
 Simbolo* busca_simbolo( string nome );
-
-
-// Divide uma string em vetor de strings usando espaço em branco como separador
-vector<string> tokeniza(const string& s) {
-  vector<string> tokens;
-  string token;
-  istringstream iss(s);
-  while (iss >> token) tokens.push_back(token);
-  return tokens;
-}
-
-// Remove todos os caracteres de 'chars' do início e fim da string 's'
-string trim(const string& s, const string& chars) {
-  size_t start = 0;
-  size_t end = s.size();
-  // Remove do início
-  while (start < end && chars.find(s[start]) != string::npos) ++start;
-  // Remove do fim
-  while (end > start && chars.find(s[end-1]) != string::npos) --end;
-  return s.substr(start, end - start);
-}
 
 #define YYSTYPE Atributos
 
@@ -153,26 +143,62 @@ vector<string> to_inst(string st){
     return vector<string>{st};
 }
 
+// Detecta variáveis capturadas (usadas mas não são parâmetros nem variáveis locais)
+set<string> detecta_capturas(set<string>& ids_usados, set<string>& parametros, set<string>& locais) {
+  set<string> capturas;
+  for(const string& id : ids_usados) {
+    // Se não é parâmetro e não é variável local, deve ser capturada
+    if(parametros.find(id) == parametros.end() && locais.find(id) == locais.end()) {
+      capturas.insert(id);
+    }
+  }
+  return capturas;
+}
+
+// Extrai nomes de variáveis de um vetor de código
+set<string> extrai_ids_de_codigo(vector<string>& codigo) {
+  set<string> ids;
+  for(const string& s : codigo) {
+    // Simples heurística: se começa com letra ou _, é um possível ID
+    if(!s.empty() && (isalpha(s[0]) || s[0] == '_') && s[0] != '\'' && !isdigit(s[0])) {
+      // Ignora keywords conhecidas
+      if(s != "@" && s != "=" && s != "@" && s != "^" && s != "$" && s != "[=]" && s != "[<=]" && 
+         s != "[@]" && s != "&" && s != "~" && s != "#" && s != "?" && s != "!" && 
+         s != "+" && s != "-" && s != "*" && s != "/" && s != "%" && s != "==" && s != "!=" &&
+         s != "<" && s != ">" && s != "<=" && s != ">=" && s != "<{" && s != "}>" && s != "{}") {
+        ids.insert(s);
+      }
+    }
+  }
+  return ids;
+}
+
 void empilha_escopo_novo();
 void desempilha_escopo();
 %}
 
 
-%token ID IF ELSE LET CONST VAR  FOR WHILE FUNCTION RETURN ASM //PRINT
+%token ID IF ELSE LET CONST VAR FOR WHILE FUNCTION RETURN 
 %token CDOUBLE CSTRING CINT CBOOL
 %token AND OR ME_IG MA_IG DIF IGUAL
-%token MAIS_IGUAL MAIS_MAIS MENOS_IGUAL MENOS_MENOS
+%token MAIS_IGUAL MENOS_IGUAL MAIS_MAIS MENOS_MENOS SETA
+%token ASM
+%token FECHA_PARENTESES_LAMBDA
 
-%right '=' MAIS_IGUAL
-%nonassoc AND OR
+
+%left ','
+%nonassoc MAIS_IGUAL
+
+%right '='  SETA':'
+%left OR
+%left AND
 %nonassoc IGUAL DIF
 %nonassoc '<' '>' ME_IG MA_IG
 %left '+' '-'
 %left '*' '/' '%'
-
+%right MAIS_MAIS
 %right '[' '('
-%left '.' 
-%left MAIS_MAIS MENOS_MENOS
+%left '.'
 
 
 %%
@@ -200,17 +226,17 @@ CMD : CMD_LET ';'
     | ATRIB ';'
       { $$.c = $1.c + "^"; } 
     | BLOCO
-
+    | BLOCO_VAZIO
     | ';'
       { $$.clear(); }
     ;
 
+BLOCO_VAZIO : '{' '}'
+            { $$.c = vector<string>{"<{", "}>"}; }
+           ;
+
 BLOCO : '{' START_BLOCO CMDs '}' END_BLOCO
-        { //if ($3.c.size() > 0)
-            $$.c = "<{" + $3.c + "}>" ; 
-          //else
-            //$$.c = $3.c;
-        }
+        { $$.c = "<{" + $3.c + "}>" ; }
        ;
        
 START_BLOCO : {empilha_escopo_novo();}
@@ -387,7 +413,7 @@ LET_VARs : LET_VAR ',' LET_VARs { $$.c = $1.c + $3.c; }
 
 LET_VAR : ID  
           { $$.c = declara_var( Let, $1 ).c; }
-        | ID '=' E
+        | ID '=' EOBJ
           { $$.c = declara_var( Let, $1 ).c + $1.c[0] + $3.c + "=" + "^"; } // ex: a 1 = ^
      /*   | ID '=' '{' '}'
           {
@@ -515,6 +541,10 @@ ATRIB
                   esq + "@" + dir + "@" +
                   esq + "@" + dir + "@" + "[@]" +
                   $3.c + "-" + "[=]" ;}
+  | ID SETA BLOCO
+  | ID SETA ATRIB
+  | '(' LISTA_PARAMs FECHA_PARENTESES_LAMBDA SETA ATRIB
+  | '(' LISTA_PARAMs FECHA_PARENTESES_LAMBDA SETA BLOCO
   | E
   ;
   /*| ID '=' '{' '}'
@@ -524,20 +554,27 @@ ATRIB
   | E 
   ; */
 
-EOBJ: E
-    | '{'  '}' 
-      { $$.c = vector<string>{"{}"}; }
-    | '{' CAMPOS '}' 
-      { $$.c = vector<string>{"{}"} + $2.c; }
+EOBJ : '{' CAMPOS '}'
+    { $$.c = vector<string>{"{}"}; }
+     | ECOND
+     ;
+
+EVG : ATRIB ',' EVG 
+    | ATRIB
     ;
 
-CAMPOS : CAMPO ',' CAMPOS 
-        { $$.c = $1.c + $3.c; }
-      | CAMPO 
-        { $$.c = $1.c; }
+ECOND : ECOND '?' EOBJ ':' EOBJ
+      | ATRIB
       ;
-CAMPO : ID ':' EOBJ 
-        { $$.c = $1.c + $3.c + "=" + "'&" + $1.c + "'" + "[=]"; }
+
+CAMPOS : CAMPO ',' CAMPOS
+       | CAMPO
+       |
+       ;
+
+CAMPO : ID ':' EOBJ
+      | ID
+      ; 
 
 E : ID
     { $$.c = $1.c + "@"; }
@@ -559,10 +596,6 @@ E : ID
     { $$.c = $1.c + $3.c + $2.c; }
   | E '%' E
     { $$.c = $1.c + $3.c + $2.c; }
-  | '-' E 
-    { $$.c = "0" + $2.c + "-" ; }
-  | '+' E
-    { $$.c = "0" + $2.c + "+" ; }
   | UN
     { $$.c = $1.c; }
   ;
@@ -619,9 +652,12 @@ F :   CDOUBLE
     | CINT
     | CSTRING
     | CBOOL
-    | '(' E ')'
-      { $$.c = $2.c; }
+    | '(' EVG ')' { $$.c = $2.c; }
     | LIST
+    | '-' F 
+      { $$.c = "0" + $2.c + "-" ; }
+    | '+' F
+      { $$.c = "0" + $2.c + "+" ; }
    // | '{' '}' 
      // { $$.c = vector<string>{"{}"}; }
     | CHAMA_FUNC

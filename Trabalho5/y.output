@@ -1,0 +1,3846 @@
+Terminals unused in grammar
+
+    AND
+    OR
+    ME_IG
+    MA_IG
+    DIF
+
+
+State 21 conflicts: 2 shift/reduce
+State 40 conflicts: 1 shift/reduce
+State 85 conflicts: 1 reduce/reduce
+State 91 conflicts: 1 shift/reduce
+State 196 conflicts: 1 reduce/reduce
+State 211 conflicts: 1 shift/reduce
+
+
+Grammar
+
+    0 $accept: S $end
+
+    1 S: CMDs
+    2  | ε
+
+    3 CMDs: CMDs CMD
+    4     | CMD
+
+    5 CMD: CMD_LET ';'
+    6    | CMD_VAR ';'
+    7    | CMD_CONST ';'
+    8    | CMD_IF
+    9    | CMD_FUNC
+   10    | CMD_FOR
+   11    | CMD_WHILE
+   12    | CMD_RET ';'
+   13    | CMD_ASM ';'
+   14    | ATRIB ';'
+   15    | BLOCO
+   16    | BLOCO_VAZIO
+   17    | ';'
+
+   18 BLOCO_VAZIO: '{' '}'
+
+   19 BLOCO: '{' START_BLOCO CMDs '}' END_BLOCO
+
+   20 START_BLOCO: ε
+
+   21 END_BLOCO: ε
+
+   22 CMD_RET: RETURN
+   23        | RETURN E
+
+   24 CMD_ASM: EOBJ ASM
+
+   25 EMPILHA_TS_FUNC: ε
+
+   26 DESEMPILHA_TS_FUNC: ε
+
+   27 CMD_FUNC: FUNCTION NOME_FUNCAO '(' EMPILHA_TS_FUNC LISTA_PARAMs ')' '{' CMDs '}' DESEMPILHA_TS_FUNC
+
+   28 NOME_FUNCAO: ID
+
+   29 LISTA_PARAMs: PARAMs
+   30             | PARAMs ','
+   31             | ε
+
+   32 PARAMs: PARAMs ',' PARAM
+   33       | PARAM
+
+   34 PARAM: ID
+   35      | ID '=' EOBJ
+
+   36 CMD_FOR: FOR '(' SF ';' E ';' EF ')' CMD
+
+   37 EF: ATRIB
+   38   | ε
+
+   39 SF: CMD_LET
+   40   | CMD_VAR
+   41   | CMD_CONST
+   42   | EF
+
+   43 CMD_WHILE: WHILE '(' E ')' CMD
+
+   44 CMD_LET: LET LET_VARs
+
+   45 LET_VARs: LET_VAR ',' LET_VARs
+   46         | LET_VAR
+
+   47 LET_VAR: ID
+   48        | ID '=' EOBJ
+
+   49 CMD_VAR: VAR VAR_VARs
+
+   50 VAR_VARs: VAR_VAR ',' VAR_VARs
+   51         | VAR_VAR
+
+   52 VAR_VAR: ID
+   53        | ID '=' E
+
+   54 CMD_CONST: CONST CONST_VARs
+
+   55 CONST_VARs: CONST_VAR ',' CONST_VARs
+   56           | CONST_VAR
+
+   57 CONST_VAR: ID
+   58          | ID '=' E
+
+   59 CMD_IF: IF '(' E ')' CMD
+   60       | IF '(' E ')' CMD ELSE CMD
+
+   61 LVALUEPROP: LVALUEPROP '[' EOBJ ']'
+   62           | LVALUEPROP '.' ID
+   63           | F '[' EOBJ ']'
+   64           | F '.' ID
+   65           | ID '[' EOBJ ']'
+   66           | ID '.' ID
+
+   67 LIST: '[' LISTVALS ']'
+   68     | '[' ']'
+
+   69 LISTVALS: LISTVAL ',' LISTVALS
+   70         | LISTVAL
+
+   71 LISTVAL: E
+
+   72 ATRIB: ID '=' ATRIB
+   73      | ID MAIS_IGUAL ATRIB
+   74      | ID MENOS_IGUAL ATRIB
+   75      | LVALUEPROP '=' ATRIB
+   76      | LVALUEPROP MAIS_IGUAL ATRIB
+   77      | LVALUEPROP MENOS_IGUAL ATRIB
+   78      | ID SETA BLOCO
+   79      | ID SETA ATRIB
+   80      | '(' LISTA_PARAMs FECHA_PARENTESES_LAMBDA SETA ATRIB
+   81      | '(' LISTA_PARAMs FECHA_PARENTESES_LAMBDA SETA BLOCO
+   82      | E
+
+   83 EOBJ: '{' CAMPOS '}'
+   84     | ECOND
+
+   85 EVG: ATRIB ',' EVG
+   86    | ATRIB
+
+   87 ECOND: ECOND '?' EOBJ ':' EOBJ
+   88      | ATRIB
+
+   89 CAMPOS: CAMPO ',' CAMPOS
+   90       | CAMPO
+   91       | ε
+
+   92 CAMPO: ID ':' EOBJ
+   93      | ID
+
+   94 E: ID
+   95  | LVALUEPROP
+   96  | E IGUAL E
+   97  | E '<' E
+   98  | E '>' E
+   99  | E '+' E
+  100  | E '-' E
+  101  | E '*' E
+  102  | E '/' E
+  103  | E '%' E
+  104  | UN
+
+  105 UN: MAIS_MAIS ID
+  106   | MENOS_MENOS ID
+  107   | ID MAIS_MAIS
+  108   | ID MENOS_MENOS
+  109   | MAIS_MAIS LVALUEPROP
+  110   | MENOS_MENOS LVALUEPROP
+  111   | LVALUEPROP MAIS_MAIS
+  112   | LVALUEPROP MENOS_MENOS
+  113   | F
+
+  114 F: CDOUBLE
+  115  | CINT
+  116  | CSTRING
+  117  | CBOOL
+  118  | '(' EVG ')'
+  119  | LIST
+  120  | '-' F
+  121  | '+' F
+  122  | CHAMA_FUNC
+
+  123 CHAMA_FUNC: ID '(' LISTA_ARGS ')'
+  124           | LVALUEPROP '(' LISTA_ARGS ')'
+  125           | '(' E ')' '(' LISTA_ARGS ')'
+
+  126 LISTA_ARGS: ARGs
+  127           | ARGs ','
+  128           | ε
+
+  129 ARGs: ATRIB
+  130     | ARGs ',' ATRIB
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    '%' (37) 103
+    '(' (40) 27 36 43 59 60 80 81 118 123 124 125
+    ')' (41) 27 36 43 59 60 118 123 124 125
+    '*' (42) 101
+    '+' (43) 99 121
+    ',' (44) 30 32 45 50 55 69 85 89 127 130
+    '-' (45) 100 120
+    '.' (46) 62 64 66
+    '/' (47) 102
+    ':' (58) 87 92
+    ';' (59) 5 6 7 12 13 14 17 36
+    '<' (60) 97
+    '=' (61) 35 48 53 58 72 75
+    '>' (62) 98
+    '?' (63) 87
+    '[' (91) 61 63 65 67 68
+    ']' (93) 61 63 65 67 68
+    '{' (123) 18 19 27 83
+    '}' (125) 18 19 27 83
+    error (256)
+    ID (258) 28 34 35 47 48 52 53 57 58 62 64 65 66 72 73 74 78 79 92 93 94 105 106 107 108 123
+    IF (259) 59 60
+    ELSE (260) 60
+    LET (261) 44
+    CONST (262) 54
+    VAR (263) 49
+    FOR (264) 36
+    WHILE (265) 43
+    FUNCTION (266) 27
+    RETURN (267) 22 23
+    CDOUBLE (268) 114
+    CSTRING (269) 116
+    CINT (270) 115
+    CBOOL (271) 117
+    AND (272)
+    OR (273)
+    ME_IG (274)
+    MA_IG (275)
+    DIF (276)
+    IGUAL (277) 96
+    MAIS_IGUAL (278) 73 76
+    MENOS_IGUAL (279) 74 77
+    MAIS_MAIS (280) 105 107 109 111
+    MENOS_MENOS (281) 106 108 110 112
+    SETA (282) 78 79 80 81
+    ASM (283) 24
+    FECHA_PARENTESES_LAMBDA (284) 80 81
+
+
+Nonterminals, with rules where they appear
+
+    $accept (49)
+        on left: 0
+    S (50)
+        on left: 1 2
+        on right: 0
+    CMDs (51)
+        on left: 3 4
+        on right: 1 3 19 27
+    CMD (52)
+        on left: 5 6 7 8 9 10 11 12 13 14 15 16 17
+        on right: 3 4 36 43 59 60
+    BLOCO_VAZIO (53)
+        on left: 18
+        on right: 16
+    BLOCO (54)
+        on left: 19
+        on right: 15 78 81
+    START_BLOCO (55)
+        on left: 20
+        on right: 19
+    END_BLOCO (56)
+        on left: 21
+        on right: 19
+    CMD_RET (57)
+        on left: 22 23
+        on right: 12
+    CMD_ASM (58)
+        on left: 24
+        on right: 13
+    EMPILHA_TS_FUNC (59)
+        on left: 25
+        on right: 27
+    DESEMPILHA_TS_FUNC (60)
+        on left: 26
+        on right: 27
+    CMD_FUNC (61)
+        on left: 27
+        on right: 9
+    NOME_FUNCAO (62)
+        on left: 28
+        on right: 27
+    LISTA_PARAMs (63)
+        on left: 29 30 31
+        on right: 27 80 81
+    PARAMs (64)
+        on left: 32 33
+        on right: 29 30 32
+    PARAM (65)
+        on left: 34 35
+        on right: 32 33
+    CMD_FOR (66)
+        on left: 36
+        on right: 10
+    EF (67)
+        on left: 37 38
+        on right: 36 42
+    SF (68)
+        on left: 39 40 41 42
+        on right: 36
+    CMD_WHILE (69)
+        on left: 43
+        on right: 11
+    CMD_LET (70)
+        on left: 44
+        on right: 5 39
+    LET_VARs (71)
+        on left: 45 46
+        on right: 44 45
+    LET_VAR (72)
+        on left: 47 48
+        on right: 45 46
+    CMD_VAR (73)
+        on left: 49
+        on right: 6 40
+    VAR_VARs (74)
+        on left: 50 51
+        on right: 49 50
+    VAR_VAR (75)
+        on left: 52 53
+        on right: 50 51
+    CMD_CONST (76)
+        on left: 54
+        on right: 7 41
+    CONST_VARs (77)
+        on left: 55 56
+        on right: 54 55
+    CONST_VAR (78)
+        on left: 57 58
+        on right: 55 56
+    CMD_IF (79)
+        on left: 59 60
+        on right: 8
+    LVALUEPROP (80)
+        on left: 61 62 63 64 65 66
+        on right: 61 62 75 76 77 95 109 110 111 112 124
+    LIST (81)
+        on left: 67 68
+        on right: 119
+    LISTVALS (82)
+        on left: 69 70
+        on right: 67 69
+    LISTVAL (83)
+        on left: 71
+        on right: 69 70
+    ATRIB (84)
+        on left: 72 73 74 75 76 77 78 79 80 81 82
+        on right: 14 37 72 73 74 75 76 77 79 80 85 86 88 129 130
+    EOBJ (85)
+        on left: 83 84
+        on right: 24 35 48 61 63 65 87 92
+    EVG (86)
+        on left: 85 86
+        on right: 85 118
+    ECOND (87)
+        on left: 87 88
+        on right: 84 87
+    CAMPOS (88)
+        on left: 89 90 91
+        on right: 83 89
+    CAMPO (89)
+        on left: 92 93
+        on right: 89 90
+    E (90)
+        on left: 94 95 96 97 98 99 100 101 102 103 104
+        on right: 23 36 43 53 58 59 60 71 82 96 97 98 99 100 101 102 103 125
+    UN (91)
+        on left: 105 106 107 108 109 110 111 112 113
+        on right: 104
+    F (92)
+        on left: 114 115 116 117 118 119 120 121 122
+        on right: 63 64 113 120 121
+    CHAMA_FUNC (93)
+        on left: 123 124 125
+        on right: 122
+    LISTA_ARGS (94)
+        on left: 126 127 128
+        on right: 123 124 125
+    ARGs (95)
+        on left: 129 130
+        on right: 126 127 130
+
+
+State 0
+
+    0 $accept: • S $end
+
+    ID           shift, and go to state 1
+    IF           shift, and go to state 2
+    LET          shift, and go to state 3
+    CONST        shift, and go to state 4
+    VAR          shift, and go to state 5
+    FOR          shift, and go to state 6
+    WHILE        shift, and go to state 7
+    FUNCTION     shift, and go to state 8
+    RETURN       shift, and go to state 9
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    ';'          shift, and go to state 20
+    '{'          shift, and go to state 21
+
+    $default  reduce using rule 2 (S)
+
+    S            go to state 22
+    CMDs         go to state 23
+    CMD          go to state 24
+    BLOCO_VAZIO  go to state 25
+    BLOCO        go to state 26
+    CMD_RET      go to state 27
+    CMD_ASM      go to state 28
+    CMD_FUNC     go to state 29
+    CMD_FOR      go to state 30
+    CMD_WHILE    go to state 31
+    CMD_LET      go to state 32
+    CMD_VAR      go to state 33
+    CMD_CONST    go to state 34
+    CMD_IF       go to state 35
+    LVALUEPROP   go to state 36
+    LIST         go to state 37
+    ATRIB        go to state 38
+    EOBJ         go to state 39
+    ECOND        go to state 40
+    E            go to state 41
+    UN           go to state 42
+    F            go to state 43
+    CHAMA_FUNC   go to state 44
+
+
+State 1
+
+   65 LVALUEPROP: ID • '[' EOBJ ']'
+   66           | ID • '.' ID
+   72 ATRIB: ID • '=' ATRIB
+   73      | ID • MAIS_IGUAL ATRIB
+   74      | ID • MENOS_IGUAL ATRIB
+   78      | ID • SETA BLOCO
+   79      | ID • SETA ATRIB
+   94 E: ID •
+  107 UN: ID • MAIS_MAIS
+  108   | ID • MENOS_MENOS
+  123 CHAMA_FUNC: ID • '(' LISTA_ARGS ')'
+
+    MAIS_IGUAL   shift, and go to state 45
+    MENOS_IGUAL  shift, and go to state 46
+    MAIS_MAIS    shift, and go to state 47
+    MENOS_MENOS  shift, and go to state 48
+    SETA         shift, and go to state 49
+    '='          shift, and go to state 50
+    '['          shift, and go to state 51
+    '('          shift, and go to state 52
+    '.'          shift, and go to state 53
+
+    $default  reduce using rule 94 (E)
+
+
+State 2
+
+   59 CMD_IF: IF • '(' E ')' CMD
+   60       | IF • '(' E ')' CMD ELSE CMD
+
+    '('  shift, and go to state 54
+
+
+State 3
+
+   44 CMD_LET: LET • LET_VARs
+
+    ID  shift, and go to state 55
+
+    LET_VARs  go to state 56
+    LET_VAR   go to state 57
+
+
+State 4
+
+   54 CMD_CONST: CONST • CONST_VARs
+
+    ID  shift, and go to state 58
+
+    CONST_VARs  go to state 59
+    CONST_VAR   go to state 60
+
+
+State 5
+
+   49 CMD_VAR: VAR • VAR_VARs
+
+    ID  shift, and go to state 61
+
+    VAR_VARs  go to state 62
+    VAR_VAR   go to state 63
+
+
+State 6
+
+   36 CMD_FOR: FOR • '(' SF ';' E ';' EF ')' CMD
+
+    '('  shift, and go to state 64
+
+
+State 7
+
+   43 CMD_WHILE: WHILE • '(' E ')' CMD
+
+    '('  shift, and go to state 65
+
+
+State 8
+
+   27 CMD_FUNC: FUNCTION • NOME_FUNCAO '(' EMPILHA_TS_FUNC LISTA_PARAMs ')' '{' CMDs '}' DESEMPILHA_TS_FUNC
+
+    ID  shift, and go to state 66
+
+    NOME_FUNCAO  go to state 67
+
+
+State 9
+
+   22 CMD_RET: RETURN •
+   23        | RETURN • E
+
+    ID           shift, and go to state 68
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 69
+
+    $default  reduce using rule 22 (CMD_RET)
+
+    LVALUEPROP  go to state 70
+    LIST        go to state 37
+    E           go to state 71
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 10
+
+  114 F: CDOUBLE •
+
+    $default  reduce using rule 114 (F)
+
+
+State 11
+
+  116 F: CSTRING •
+
+    $default  reduce using rule 116 (F)
+
+
+State 12
+
+  115 F: CINT •
+
+    $default  reduce using rule 115 (F)
+
+
+State 13
+
+  117 F: CBOOL •
+
+    $default  reduce using rule 117 (F)
+
+
+State 14
+
+  105 UN: MAIS_MAIS • ID
+  109   | MAIS_MAIS • LVALUEPROP
+
+    ID       shift, and go to state 72
+    CDOUBLE  shift, and go to state 10
+    CSTRING  shift, and go to state 11
+    CINT     shift, and go to state 12
+    CBOOL    shift, and go to state 13
+    '+'      shift, and go to state 16
+    '-'      shift, and go to state 17
+    '['      shift, and go to state 18
+    '('      shift, and go to state 69
+
+    LVALUEPROP  go to state 73
+    LIST        go to state 37
+    F           go to state 74
+    CHAMA_FUNC  go to state 44
+
+
+State 15
+
+  106 UN: MENOS_MENOS • ID
+  110   | MENOS_MENOS • LVALUEPROP
+
+    ID       shift, and go to state 75
+    CDOUBLE  shift, and go to state 10
+    CSTRING  shift, and go to state 11
+    CINT     shift, and go to state 12
+    CBOOL    shift, and go to state 13
+    '+'      shift, and go to state 16
+    '-'      shift, and go to state 17
+    '['      shift, and go to state 18
+    '('      shift, and go to state 69
+
+    LVALUEPROP  go to state 76
+    LIST        go to state 37
+    F           go to state 74
+    CHAMA_FUNC  go to state 44
+
+
+State 16
+
+  121 F: '+' • F
+
+    ID       shift, and go to state 77
+    CDOUBLE  shift, and go to state 10
+    CSTRING  shift, and go to state 11
+    CINT     shift, and go to state 12
+    CBOOL    shift, and go to state 13
+    '+'      shift, and go to state 16
+    '-'      shift, and go to state 17
+    '['      shift, and go to state 18
+    '('      shift, and go to state 69
+
+    LVALUEPROP  go to state 78
+    LIST        go to state 37
+    F           go to state 79
+    CHAMA_FUNC  go to state 44
+
+
+State 17
+
+  120 F: '-' • F
+
+    ID       shift, and go to state 77
+    CDOUBLE  shift, and go to state 10
+    CSTRING  shift, and go to state 11
+    CINT     shift, and go to state 12
+    CBOOL    shift, and go to state 13
+    '+'      shift, and go to state 16
+    '-'      shift, and go to state 17
+    '['      shift, and go to state 18
+    '('      shift, and go to state 69
+
+    LVALUEPROP  go to state 78
+    LIST        go to state 37
+    F           go to state 80
+    CHAMA_FUNC  go to state 44
+
+
+State 18
+
+   67 LIST: '[' • LISTVALS ']'
+   68     | '[' • ']'
+
+    ID           shift, and go to state 68
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 69
+    ']'          shift, and go to state 81
+
+    LVALUEPROP  go to state 70
+    LIST        go to state 37
+    LISTVALS    go to state 82
+    LISTVAL     go to state 83
+    E           go to state 84
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 19
+
+   80 ATRIB: '(' • LISTA_PARAMs FECHA_PARENTESES_LAMBDA SETA ATRIB
+   81      | '(' • LISTA_PARAMs FECHA_PARENTESES_LAMBDA SETA BLOCO
+  118 F: '(' • EVG ')'
+  125 CHAMA_FUNC: '(' • E ')' '(' LISTA_ARGS ')'
+
+    ID           shift, and go to state 85
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+
+    $default  reduce using rule 31 (LISTA_PARAMs)
+
+    LISTA_PARAMs  go to state 86
+    PARAMs        go to state 87
+    PARAM         go to state 88
+    LVALUEPROP    go to state 36
+    LIST          go to state 37
+    ATRIB         go to state 89
+    EVG           go to state 90
+    E             go to state 91
+    UN            go to state 42
+    F             go to state 43
+    CHAMA_FUNC    go to state 44
+
+
+State 20
+
+   17 CMD: ';' •
+
+    $default  reduce using rule 17 (CMD)
+
+
+State 21
+
+   18 BLOCO_VAZIO: '{' • '}'
+   19 BLOCO: '{' • START_BLOCO CMDs '}' END_BLOCO
+   83 EOBJ: '{' • CAMPOS '}'
+
+    ID   shift, and go to state 92
+    '}'  shift, and go to state 93
+
+    ID        [reduce using rule 20 (START_BLOCO)]
+    '}'       [reduce using rule 91 (CAMPOS)]
+    $default  reduce using rule 20 (START_BLOCO)
+
+    START_BLOCO  go to state 94
+    CAMPOS       go to state 95
+    CAMPO        go to state 96
+
+
+State 22
+
+    0 $accept: S • $end
+
+    $end  shift, and go to state 97
+
+
+State 23
+
+    1 S: CMDs •
+    3 CMDs: CMDs • CMD
+
+    ID           shift, and go to state 1
+    IF           shift, and go to state 2
+    LET          shift, and go to state 3
+    CONST        shift, and go to state 4
+    VAR          shift, and go to state 5
+    FOR          shift, and go to state 6
+    WHILE        shift, and go to state 7
+    FUNCTION     shift, and go to state 8
+    RETURN       shift, and go to state 9
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    ';'          shift, and go to state 20
+    '{'          shift, and go to state 21
+
+    $default  reduce using rule 1 (S)
+
+    CMD          go to state 98
+    BLOCO_VAZIO  go to state 25
+    BLOCO        go to state 26
+    CMD_RET      go to state 27
+    CMD_ASM      go to state 28
+    CMD_FUNC     go to state 29
+    CMD_FOR      go to state 30
+    CMD_WHILE    go to state 31
+    CMD_LET      go to state 32
+    CMD_VAR      go to state 33
+    CMD_CONST    go to state 34
+    CMD_IF       go to state 35
+    LVALUEPROP   go to state 36
+    LIST         go to state 37
+    ATRIB        go to state 38
+    EOBJ         go to state 39
+    ECOND        go to state 40
+    E            go to state 41
+    UN           go to state 42
+    F            go to state 43
+    CHAMA_FUNC   go to state 44
+
+
+State 24
+
+    4 CMDs: CMD •
+
+    $default  reduce using rule 4 (CMDs)
+
+
+State 25
+
+   16 CMD: BLOCO_VAZIO •
+
+    $default  reduce using rule 16 (CMD)
+
+
+State 26
+
+   15 CMD: BLOCO •
+
+    $default  reduce using rule 15 (CMD)
+
+
+State 27
+
+   12 CMD: CMD_RET • ';'
+
+    ';'  shift, and go to state 99
+
+
+State 28
+
+   13 CMD: CMD_ASM • ';'
+
+    ';'  shift, and go to state 100
+
+
+State 29
+
+    9 CMD: CMD_FUNC •
+
+    $default  reduce using rule 9 (CMD)
+
+
+State 30
+
+   10 CMD: CMD_FOR •
+
+    $default  reduce using rule 10 (CMD)
+
+
+State 31
+
+   11 CMD: CMD_WHILE •
+
+    $default  reduce using rule 11 (CMD)
+
+
+State 32
+
+    5 CMD: CMD_LET • ';'
+
+    ';'  shift, and go to state 101
+
+
+State 33
+
+    6 CMD: CMD_VAR • ';'
+
+    ';'  shift, and go to state 102
+
+
+State 34
+
+    7 CMD: CMD_CONST • ';'
+
+    ';'  shift, and go to state 103
+
+
+State 35
+
+    8 CMD: CMD_IF •
+
+    $default  reduce using rule 8 (CMD)
+
+
+State 36
+
+   61 LVALUEPROP: LVALUEPROP • '[' EOBJ ']'
+   62           | LVALUEPROP • '.' ID
+   75 ATRIB: LVALUEPROP • '=' ATRIB
+   76      | LVALUEPROP • MAIS_IGUAL ATRIB
+   77      | LVALUEPROP • MENOS_IGUAL ATRIB
+   95 E: LVALUEPROP •
+  111 UN: LVALUEPROP • MAIS_MAIS
+  112   | LVALUEPROP • MENOS_MENOS
+  124 CHAMA_FUNC: LVALUEPROP • '(' LISTA_ARGS ')'
+
+    MAIS_IGUAL   shift, and go to state 104
+    MENOS_IGUAL  shift, and go to state 105
+    MAIS_MAIS    shift, and go to state 106
+    MENOS_MENOS  shift, and go to state 107
+    '='          shift, and go to state 108
+    '['          shift, and go to state 109
+    '('          shift, and go to state 110
+    '.'          shift, and go to state 111
+
+    $default  reduce using rule 95 (E)
+
+
+State 37
+
+  119 F: LIST •
+
+    $default  reduce using rule 119 (F)
+
+
+State 38
+
+   14 CMD: ATRIB • ';'
+   88 ECOND: ATRIB •
+
+    ';'  shift, and go to state 112
+
+    $default  reduce using rule 88 (ECOND)
+
+
+State 39
+
+   24 CMD_ASM: EOBJ • ASM
+
+    ASM  shift, and go to state 113
+
+
+State 40
+
+   84 EOBJ: ECOND •
+   87 ECOND: ECOND • '?' EOBJ ':' EOBJ
+
+    '?'  shift, and go to state 114
+
+    '?'       [reduce using rule 84 (EOBJ)]
+    $default  reduce using rule 84 (EOBJ)
+
+
+State 41
+
+   82 ATRIB: E •
+   96 E: E • IGUAL E
+   97  | E • '<' E
+   98  | E • '>' E
+   99  | E • '+' E
+  100  | E • '-' E
+  101  | E • '*' E
+  102  | E • '/' E
+  103  | E • '%' E
+
+    IGUAL  shift, and go to state 115
+    '<'    shift, and go to state 116
+    '>'    shift, and go to state 117
+    '+'    shift, and go to state 118
+    '-'    shift, and go to state 119
+    '*'    shift, and go to state 120
+    '/'    shift, and go to state 121
+    '%'    shift, and go to state 122
+
+    $default  reduce using rule 82 (ATRIB)
+
+
+State 42
+
+  104 E: UN •
+
+    $default  reduce using rule 104 (E)
+
+
+State 43
+
+   63 LVALUEPROP: F • '[' EOBJ ']'
+   64           | F • '.' ID
+  113 UN: F •
+
+    '['  shift, and go to state 123
+    '.'  shift, and go to state 124
+
+    $default  reduce using rule 113 (UN)
+
+
+State 44
+
+  122 F: CHAMA_FUNC •
+
+    $default  reduce using rule 122 (F)
+
+
+State 45
+
+   73 ATRIB: ID MAIS_IGUAL • ATRIB
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 125
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 46
+
+   74 ATRIB: ID MENOS_IGUAL • ATRIB
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 126
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 47
+
+  107 UN: ID MAIS_MAIS •
+
+    $default  reduce using rule 107 (UN)
+
+
+State 48
+
+  108 UN: ID MENOS_MENOS •
+
+    $default  reduce using rule 108 (UN)
+
+
+State 49
+
+   78 ATRIB: ID SETA • BLOCO
+   79      | ID SETA • ATRIB
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    '{'          shift, and go to state 127
+
+    BLOCO       go to state 128
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 129
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 50
+
+   72 ATRIB: ID '=' • ATRIB
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 130
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 51
+
+   65 LVALUEPROP: ID '[' • EOBJ ']'
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    '{'          shift, and go to state 131
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 132
+    EOBJ        go to state 133
+    ECOND       go to state 40
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 52
+
+  123 CHAMA_FUNC: ID '(' • LISTA_ARGS ')'
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+
+    $default  reduce using rule 128 (LISTA_ARGS)
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 134
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+    LISTA_ARGS  go to state 135
+    ARGs        go to state 136
+
+
+State 53
+
+   66 LVALUEPROP: ID '.' • ID
+
+    ID  shift, and go to state 137
+
+
+State 54
+
+   59 CMD_IF: IF '(' • E ')' CMD
+   60       | IF '(' • E ')' CMD ELSE CMD
+
+    ID           shift, and go to state 68
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 69
+
+    LVALUEPROP  go to state 70
+    LIST        go to state 37
+    E           go to state 138
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 55
+
+   47 LET_VAR: ID •
+   48        | ID • '=' EOBJ
+
+    '='  shift, and go to state 139
+
+    $default  reduce using rule 47 (LET_VAR)
+
+
+State 56
+
+   44 CMD_LET: LET LET_VARs •
+
+    $default  reduce using rule 44 (CMD_LET)
+
+
+State 57
+
+   45 LET_VARs: LET_VAR • ',' LET_VARs
+   46         | LET_VAR •
+
+    ','  shift, and go to state 140
+
+    $default  reduce using rule 46 (LET_VARs)
+
+
+State 58
+
+   57 CONST_VAR: ID •
+   58          | ID • '=' E
+
+    '='  shift, and go to state 141
+
+    $default  reduce using rule 57 (CONST_VAR)
+
+
+State 59
+
+   54 CMD_CONST: CONST CONST_VARs •
+
+    $default  reduce using rule 54 (CMD_CONST)
+
+
+State 60
+
+   55 CONST_VARs: CONST_VAR • ',' CONST_VARs
+   56           | CONST_VAR •
+
+    ','  shift, and go to state 142
+
+    $default  reduce using rule 56 (CONST_VARs)
+
+
+State 61
+
+   52 VAR_VAR: ID •
+   53        | ID • '=' E
+
+    '='  shift, and go to state 143
+
+    $default  reduce using rule 52 (VAR_VAR)
+
+
+State 62
+
+   49 CMD_VAR: VAR VAR_VARs •
+
+    $default  reduce using rule 49 (CMD_VAR)
+
+
+State 63
+
+   50 VAR_VARs: VAR_VAR • ',' VAR_VARs
+   51         | VAR_VAR •
+
+    ','  shift, and go to state 144
+
+    $default  reduce using rule 51 (VAR_VARs)
+
+
+State 64
+
+   36 CMD_FOR: FOR '(' • SF ';' E ';' EF ')' CMD
+
+    ID           shift, and go to state 1
+    LET          shift, and go to state 3
+    CONST        shift, and go to state 4
+    VAR          shift, and go to state 5
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+
+    $default  reduce using rule 38 (EF)
+
+    EF          go to state 145
+    SF          go to state 146
+    CMD_LET     go to state 147
+    CMD_VAR     go to state 148
+    CMD_CONST   go to state 149
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 150
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 65
+
+   43 CMD_WHILE: WHILE '(' • E ')' CMD
+
+    ID           shift, and go to state 68
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 69
+
+    LVALUEPROP  go to state 70
+    LIST        go to state 37
+    E           go to state 151
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 66
+
+   28 NOME_FUNCAO: ID •
+
+    $default  reduce using rule 28 (NOME_FUNCAO)
+
+
+State 67
+
+   27 CMD_FUNC: FUNCTION NOME_FUNCAO • '(' EMPILHA_TS_FUNC LISTA_PARAMs ')' '{' CMDs '}' DESEMPILHA_TS_FUNC
+
+    '('  shift, and go to state 152
+
+
+State 68
+
+   65 LVALUEPROP: ID • '[' EOBJ ']'
+   66           | ID • '.' ID
+   94 E: ID •
+  107 UN: ID • MAIS_MAIS
+  108   | ID • MENOS_MENOS
+  123 CHAMA_FUNC: ID • '(' LISTA_ARGS ')'
+
+    MAIS_MAIS    shift, and go to state 47
+    MENOS_MENOS  shift, and go to state 48
+    '['          shift, and go to state 51
+    '('          shift, and go to state 52
+    '.'          shift, and go to state 53
+
+    $default  reduce using rule 94 (E)
+
+
+State 69
+
+  118 F: '(' • EVG ')'
+  125 CHAMA_FUNC: '(' • E ')' '(' LISTA_ARGS ')'
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 89
+    EVG         go to state 90
+    E           go to state 91
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 70
+
+   61 LVALUEPROP: LVALUEPROP • '[' EOBJ ']'
+   62           | LVALUEPROP • '.' ID
+   95 E: LVALUEPROP •
+  111 UN: LVALUEPROP • MAIS_MAIS
+  112   | LVALUEPROP • MENOS_MENOS
+  124 CHAMA_FUNC: LVALUEPROP • '(' LISTA_ARGS ')'
+
+    MAIS_MAIS    shift, and go to state 106
+    MENOS_MENOS  shift, and go to state 107
+    '['          shift, and go to state 109
+    '('          shift, and go to state 110
+    '.'          shift, and go to state 111
+
+    $default  reduce using rule 95 (E)
+
+
+State 71
+
+   23 CMD_RET: RETURN E •
+   96 E: E • IGUAL E
+   97  | E • '<' E
+   98  | E • '>' E
+   99  | E • '+' E
+  100  | E • '-' E
+  101  | E • '*' E
+  102  | E • '/' E
+  103  | E • '%' E
+
+    IGUAL  shift, and go to state 115
+    '<'    shift, and go to state 116
+    '>'    shift, and go to state 117
+    '+'    shift, and go to state 118
+    '-'    shift, and go to state 119
+    '*'    shift, and go to state 120
+    '/'    shift, and go to state 121
+    '%'    shift, and go to state 122
+
+    $default  reduce using rule 23 (CMD_RET)
+
+
+State 72
+
+   65 LVALUEPROP: ID • '[' EOBJ ']'
+   66           | ID • '.' ID
+  105 UN: MAIS_MAIS ID •
+  123 CHAMA_FUNC: ID • '(' LISTA_ARGS ')'
+
+    '['  shift, and go to state 51
+    '('  shift, and go to state 52
+    '.'  shift, and go to state 53
+
+    $default  reduce using rule 105 (UN)
+
+
+State 73
+
+   61 LVALUEPROP: LVALUEPROP • '[' EOBJ ']'
+   62           | LVALUEPROP • '.' ID
+  109 UN: MAIS_MAIS LVALUEPROP •
+  124 CHAMA_FUNC: LVALUEPROP • '(' LISTA_ARGS ')'
+
+    '['  shift, and go to state 109
+    '('  shift, and go to state 110
+    '.'  shift, and go to state 111
+
+    $default  reduce using rule 109 (UN)
+
+
+State 74
+
+   63 LVALUEPROP: F • '[' EOBJ ']'
+   64           | F • '.' ID
+
+    '['  shift, and go to state 123
+    '.'  shift, and go to state 124
+
+
+State 75
+
+   65 LVALUEPROP: ID • '[' EOBJ ']'
+   66           | ID • '.' ID
+  106 UN: MENOS_MENOS ID •
+  123 CHAMA_FUNC: ID • '(' LISTA_ARGS ')'
+
+    '['  shift, and go to state 51
+    '('  shift, and go to state 52
+    '.'  shift, and go to state 53
+
+    $default  reduce using rule 106 (UN)
+
+
+State 76
+
+   61 LVALUEPROP: LVALUEPROP • '[' EOBJ ']'
+   62           | LVALUEPROP • '.' ID
+  110 UN: MENOS_MENOS LVALUEPROP •
+  124 CHAMA_FUNC: LVALUEPROP • '(' LISTA_ARGS ')'
+
+    '['  shift, and go to state 109
+    '('  shift, and go to state 110
+    '.'  shift, and go to state 111
+
+    $default  reduce using rule 110 (UN)
+
+
+State 77
+
+   65 LVALUEPROP: ID • '[' EOBJ ']'
+   66           | ID • '.' ID
+  123 CHAMA_FUNC: ID • '(' LISTA_ARGS ')'
+
+    '['  shift, and go to state 51
+    '('  shift, and go to state 52
+    '.'  shift, and go to state 53
+
+
+State 78
+
+   61 LVALUEPROP: LVALUEPROP • '[' EOBJ ']'
+   62           | LVALUEPROP • '.' ID
+  124 CHAMA_FUNC: LVALUEPROP • '(' LISTA_ARGS ')'
+
+    '['  shift, and go to state 109
+    '('  shift, and go to state 110
+    '.'  shift, and go to state 111
+
+
+State 79
+
+   63 LVALUEPROP: F • '[' EOBJ ']'
+   64           | F • '.' ID
+  121 F: '+' F •
+
+    '['  shift, and go to state 123
+    '.'  shift, and go to state 124
+
+    $default  reduce using rule 121 (F)
+
+
+State 80
+
+   63 LVALUEPROP: F • '[' EOBJ ']'
+   64           | F • '.' ID
+  120 F: '-' F •
+
+    '['  shift, and go to state 123
+    '.'  shift, and go to state 124
+
+    $default  reduce using rule 120 (F)
+
+
+State 81
+
+   68 LIST: '[' ']' •
+
+    $default  reduce using rule 68 (LIST)
+
+
+State 82
+
+   67 LIST: '[' LISTVALS • ']'
+
+    ']'  shift, and go to state 153
+
+
+State 83
+
+   69 LISTVALS: LISTVAL • ',' LISTVALS
+   70         | LISTVAL •
+
+    ','  shift, and go to state 154
+
+    $default  reduce using rule 70 (LISTVALS)
+
+
+State 84
+
+   71 LISTVAL: E •
+   96 E: E • IGUAL E
+   97  | E • '<' E
+   98  | E • '>' E
+   99  | E • '+' E
+  100  | E • '-' E
+  101  | E • '*' E
+  102  | E • '/' E
+  103  | E • '%' E
+
+    IGUAL  shift, and go to state 115
+    '<'    shift, and go to state 116
+    '>'    shift, and go to state 117
+    '+'    shift, and go to state 118
+    '-'    shift, and go to state 119
+    '*'    shift, and go to state 120
+    '/'    shift, and go to state 121
+    '%'    shift, and go to state 122
+
+    $default  reduce using rule 71 (LISTVAL)
+
+
+State 85
+
+   34 PARAM: ID •
+   35      | ID • '=' EOBJ
+   65 LVALUEPROP: ID • '[' EOBJ ']'
+   66           | ID • '.' ID
+   72 ATRIB: ID • '=' ATRIB
+   73      | ID • MAIS_IGUAL ATRIB
+   74      | ID • MENOS_IGUAL ATRIB
+   78      | ID • SETA BLOCO
+   79      | ID • SETA ATRIB
+   94 E: ID •
+  107 UN: ID • MAIS_MAIS
+  108   | ID • MENOS_MENOS
+  123 CHAMA_FUNC: ID • '(' LISTA_ARGS ')'
+
+    MAIS_IGUAL   shift, and go to state 45
+    MENOS_IGUAL  shift, and go to state 46
+    MAIS_MAIS    shift, and go to state 47
+    MENOS_MENOS  shift, and go to state 48
+    SETA         shift, and go to state 49
+    '='          shift, and go to state 155
+    '['          shift, and go to state 51
+    '('          shift, and go to state 52
+    '.'          shift, and go to state 53
+
+    FECHA_PARENTESES_LAMBDA  reduce using rule 34 (PARAM)
+    ','                      reduce using rule 34 (PARAM)
+    ','                      [reduce using rule 94 (E)]
+    $default                 reduce using rule 94 (E)
+
+
+State 86
+
+   80 ATRIB: '(' LISTA_PARAMs • FECHA_PARENTESES_LAMBDA SETA ATRIB
+   81      | '(' LISTA_PARAMs • FECHA_PARENTESES_LAMBDA SETA BLOCO
+
+    FECHA_PARENTESES_LAMBDA  shift, and go to state 156
+
+
+State 87
+
+   29 LISTA_PARAMs: PARAMs •
+   30             | PARAMs • ','
+   32 PARAMs: PARAMs • ',' PARAM
+
+    ','  shift, and go to state 157
+
+    $default  reduce using rule 29 (LISTA_PARAMs)
+
+
+State 88
+
+   33 PARAMs: PARAM •
+
+    $default  reduce using rule 33 (PARAMs)
+
+
+State 89
+
+   85 EVG: ATRIB • ',' EVG
+   86    | ATRIB •
+
+    ','  shift, and go to state 158
+
+    $default  reduce using rule 86 (EVG)
+
+
+State 90
+
+  118 F: '(' EVG • ')'
+
+    ')'  shift, and go to state 159
+
+
+State 91
+
+   82 ATRIB: E •
+   96 E: E • IGUAL E
+   97  | E • '<' E
+   98  | E • '>' E
+   99  | E • '+' E
+  100  | E • '-' E
+  101  | E • '*' E
+  102  | E • '/' E
+  103  | E • '%' E
+  125 CHAMA_FUNC: '(' E • ')' '(' LISTA_ARGS ')'
+
+    IGUAL  shift, and go to state 115
+    '<'    shift, and go to state 116
+    '>'    shift, and go to state 117
+    '+'    shift, and go to state 118
+    '-'    shift, and go to state 119
+    '*'    shift, and go to state 120
+    '/'    shift, and go to state 121
+    '%'    shift, and go to state 122
+    ')'    shift, and go to state 160
+
+    ')'       [reduce using rule 82 (ATRIB)]
+    $default  reduce using rule 82 (ATRIB)
+
+
+State 92
+
+   92 CAMPO: ID • ':' EOBJ
+   93      | ID •
+
+    ':'  shift, and go to state 161
+
+    $default  reduce using rule 93 (CAMPO)
+
+
+State 93
+
+   18 BLOCO_VAZIO: '{' '}' •
+
+    $default  reduce using rule 18 (BLOCO_VAZIO)
+
+
+State 94
+
+   19 BLOCO: '{' START_BLOCO • CMDs '}' END_BLOCO
+
+    ID           shift, and go to state 1
+    IF           shift, and go to state 2
+    LET          shift, and go to state 3
+    CONST        shift, and go to state 4
+    VAR          shift, and go to state 5
+    FOR          shift, and go to state 6
+    WHILE        shift, and go to state 7
+    FUNCTION     shift, and go to state 8
+    RETURN       shift, and go to state 9
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    ';'          shift, and go to state 20
+    '{'          shift, and go to state 21
+
+    CMDs         go to state 162
+    CMD          go to state 24
+    BLOCO_VAZIO  go to state 25
+    BLOCO        go to state 26
+    CMD_RET      go to state 27
+    CMD_ASM      go to state 28
+    CMD_FUNC     go to state 29
+    CMD_FOR      go to state 30
+    CMD_WHILE    go to state 31
+    CMD_LET      go to state 32
+    CMD_VAR      go to state 33
+    CMD_CONST    go to state 34
+    CMD_IF       go to state 35
+    LVALUEPROP   go to state 36
+    LIST         go to state 37
+    ATRIB        go to state 38
+    EOBJ         go to state 39
+    ECOND        go to state 40
+    E            go to state 41
+    UN           go to state 42
+    F            go to state 43
+    CHAMA_FUNC   go to state 44
+
+
+State 95
+
+   83 EOBJ: '{' CAMPOS • '}'
+
+    '}'  shift, and go to state 163
+
+
+State 96
+
+   89 CAMPOS: CAMPO • ',' CAMPOS
+   90       | CAMPO •
+
+    ','  shift, and go to state 164
+
+    $default  reduce using rule 90 (CAMPOS)
+
+
+State 97
+
+    0 $accept: S $end •
+
+    $default  accept
+
+
+State 98
+
+    3 CMDs: CMDs CMD •
+
+    $default  reduce using rule 3 (CMDs)
+
+
+State 99
+
+   12 CMD: CMD_RET ';' •
+
+    $default  reduce using rule 12 (CMD)
+
+
+State 100
+
+   13 CMD: CMD_ASM ';' •
+
+    $default  reduce using rule 13 (CMD)
+
+
+State 101
+
+    5 CMD: CMD_LET ';' •
+
+    $default  reduce using rule 5 (CMD)
+
+
+State 102
+
+    6 CMD: CMD_VAR ';' •
+
+    $default  reduce using rule 6 (CMD)
+
+
+State 103
+
+    7 CMD: CMD_CONST ';' •
+
+    $default  reduce using rule 7 (CMD)
+
+
+State 104
+
+   76 ATRIB: LVALUEPROP MAIS_IGUAL • ATRIB
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 165
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 105
+
+   77 ATRIB: LVALUEPROP MENOS_IGUAL • ATRIB
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 166
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 106
+
+  111 UN: LVALUEPROP MAIS_MAIS •
+
+    $default  reduce using rule 111 (UN)
+
+
+State 107
+
+  112 UN: LVALUEPROP MENOS_MENOS •
+
+    $default  reduce using rule 112 (UN)
+
+
+State 108
+
+   75 ATRIB: LVALUEPROP '=' • ATRIB
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 167
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 109
+
+   61 LVALUEPROP: LVALUEPROP '[' • EOBJ ']'
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    '{'          shift, and go to state 131
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 132
+    EOBJ        go to state 168
+    ECOND       go to state 40
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 110
+
+  124 CHAMA_FUNC: LVALUEPROP '(' • LISTA_ARGS ')'
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+
+    $default  reduce using rule 128 (LISTA_ARGS)
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 134
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+    LISTA_ARGS  go to state 169
+    ARGs        go to state 136
+
+
+State 111
+
+   62 LVALUEPROP: LVALUEPROP '.' • ID
+
+    ID  shift, and go to state 170
+
+
+State 112
+
+   14 CMD: ATRIB ';' •
+
+    $default  reduce using rule 14 (CMD)
+
+
+State 113
+
+   24 CMD_ASM: EOBJ ASM •
+
+    $default  reduce using rule 24 (CMD_ASM)
+
+
+State 114
+
+   87 ECOND: ECOND '?' • EOBJ ':' EOBJ
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    '{'          shift, and go to state 131
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 132
+    EOBJ        go to state 171
+    ECOND       go to state 40
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 115
+
+   96 E: E IGUAL • E
+
+    ID           shift, and go to state 68
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 69
+
+    LVALUEPROP  go to state 70
+    LIST        go to state 37
+    E           go to state 172
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 116
+
+   97 E: E '<' • E
+
+    ID           shift, and go to state 68
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 69
+
+    LVALUEPROP  go to state 70
+    LIST        go to state 37
+    E           go to state 173
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 117
+
+   98 E: E '>' • E
+
+    ID           shift, and go to state 68
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 69
+
+    LVALUEPROP  go to state 70
+    LIST        go to state 37
+    E           go to state 174
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 118
+
+   99 E: E '+' • E
+
+    ID           shift, and go to state 68
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 69
+
+    LVALUEPROP  go to state 70
+    LIST        go to state 37
+    E           go to state 175
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 119
+
+  100 E: E '-' • E
+
+    ID           shift, and go to state 68
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 69
+
+    LVALUEPROP  go to state 70
+    LIST        go to state 37
+    E           go to state 176
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 120
+
+  101 E: E '*' • E
+
+    ID           shift, and go to state 68
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 69
+
+    LVALUEPROP  go to state 70
+    LIST        go to state 37
+    E           go to state 177
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 121
+
+  102 E: E '/' • E
+
+    ID           shift, and go to state 68
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 69
+
+    LVALUEPROP  go to state 70
+    LIST        go to state 37
+    E           go to state 178
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 122
+
+  103 E: E '%' • E
+
+    ID           shift, and go to state 68
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 69
+
+    LVALUEPROP  go to state 70
+    LIST        go to state 37
+    E           go to state 179
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 123
+
+   63 LVALUEPROP: F '[' • EOBJ ']'
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    '{'          shift, and go to state 131
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 132
+    EOBJ        go to state 180
+    ECOND       go to state 40
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 124
+
+   64 LVALUEPROP: F '.' • ID
+
+    ID  shift, and go to state 181
+
+
+State 125
+
+   73 ATRIB: ID MAIS_IGUAL ATRIB •
+
+    $default  reduce using rule 73 (ATRIB)
+
+
+State 126
+
+   74 ATRIB: ID MENOS_IGUAL ATRIB •
+
+    $default  reduce using rule 74 (ATRIB)
+
+
+State 127
+
+   19 BLOCO: '{' • START_BLOCO CMDs '}' END_BLOCO
+
+    $default  reduce using rule 20 (START_BLOCO)
+
+    START_BLOCO  go to state 94
+
+
+State 128
+
+   78 ATRIB: ID SETA BLOCO •
+
+    $default  reduce using rule 78 (ATRIB)
+
+
+State 129
+
+   79 ATRIB: ID SETA ATRIB •
+
+    $default  reduce using rule 79 (ATRIB)
+
+
+State 130
+
+   72 ATRIB: ID '=' ATRIB •
+
+    $default  reduce using rule 72 (ATRIB)
+
+
+State 131
+
+   83 EOBJ: '{' • CAMPOS '}'
+
+    ID  shift, and go to state 92
+
+    $default  reduce using rule 91 (CAMPOS)
+
+    CAMPOS  go to state 95
+    CAMPO   go to state 96
+
+
+State 132
+
+   88 ECOND: ATRIB •
+
+    $default  reduce using rule 88 (ECOND)
+
+
+State 133
+
+   65 LVALUEPROP: ID '[' EOBJ • ']'
+
+    ']'  shift, and go to state 182
+
+
+State 134
+
+  129 ARGs: ATRIB •
+
+    $default  reduce using rule 129 (ARGs)
+
+
+State 135
+
+  123 CHAMA_FUNC: ID '(' LISTA_ARGS • ')'
+
+    ')'  shift, and go to state 183
+
+
+State 136
+
+  126 LISTA_ARGS: ARGs •
+  127           | ARGs • ','
+  130 ARGs: ARGs • ',' ATRIB
+
+    ','  shift, and go to state 184
+
+    $default  reduce using rule 126 (LISTA_ARGS)
+
+
+State 137
+
+   66 LVALUEPROP: ID '.' ID •
+
+    $default  reduce using rule 66 (LVALUEPROP)
+
+
+State 138
+
+   59 CMD_IF: IF '(' E • ')' CMD
+   60       | IF '(' E • ')' CMD ELSE CMD
+   96 E: E • IGUAL E
+   97  | E • '<' E
+   98  | E • '>' E
+   99  | E • '+' E
+  100  | E • '-' E
+  101  | E • '*' E
+  102  | E • '/' E
+  103  | E • '%' E
+
+    IGUAL  shift, and go to state 115
+    '<'    shift, and go to state 116
+    '>'    shift, and go to state 117
+    '+'    shift, and go to state 118
+    '-'    shift, and go to state 119
+    '*'    shift, and go to state 120
+    '/'    shift, and go to state 121
+    '%'    shift, and go to state 122
+    ')'    shift, and go to state 185
+
+
+State 139
+
+   48 LET_VAR: ID '=' • EOBJ
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    '{'          shift, and go to state 131
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 132
+    EOBJ        go to state 186
+    ECOND       go to state 40
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 140
+
+   45 LET_VARs: LET_VAR ',' • LET_VARs
+
+    ID  shift, and go to state 55
+
+    LET_VARs  go to state 187
+    LET_VAR   go to state 57
+
+
+State 141
+
+   58 CONST_VAR: ID '=' • E
+
+    ID           shift, and go to state 68
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 69
+
+    LVALUEPROP  go to state 70
+    LIST        go to state 37
+    E           go to state 188
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 142
+
+   55 CONST_VARs: CONST_VAR ',' • CONST_VARs
+
+    ID  shift, and go to state 58
+
+    CONST_VARs  go to state 189
+    CONST_VAR   go to state 60
+
+
+State 143
+
+   53 VAR_VAR: ID '=' • E
+
+    ID           shift, and go to state 68
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 69
+
+    LVALUEPROP  go to state 70
+    LIST        go to state 37
+    E           go to state 190
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 144
+
+   50 VAR_VARs: VAR_VAR ',' • VAR_VARs
+
+    ID  shift, and go to state 61
+
+    VAR_VARs  go to state 191
+    VAR_VAR   go to state 63
+
+
+State 145
+
+   42 SF: EF •
+
+    $default  reduce using rule 42 (SF)
+
+
+State 146
+
+   36 CMD_FOR: FOR '(' SF • ';' E ';' EF ')' CMD
+
+    ';'  shift, and go to state 192
+
+
+State 147
+
+   39 SF: CMD_LET •
+
+    $default  reduce using rule 39 (SF)
+
+
+State 148
+
+   40 SF: CMD_VAR •
+
+    $default  reduce using rule 40 (SF)
+
+
+State 149
+
+   41 SF: CMD_CONST •
+
+    $default  reduce using rule 41 (SF)
+
+
+State 150
+
+   37 EF: ATRIB •
+
+    $default  reduce using rule 37 (EF)
+
+
+State 151
+
+   43 CMD_WHILE: WHILE '(' E • ')' CMD
+   96 E: E • IGUAL E
+   97  | E • '<' E
+   98  | E • '>' E
+   99  | E • '+' E
+  100  | E • '-' E
+  101  | E • '*' E
+  102  | E • '/' E
+  103  | E • '%' E
+
+    IGUAL  shift, and go to state 115
+    '<'    shift, and go to state 116
+    '>'    shift, and go to state 117
+    '+'    shift, and go to state 118
+    '-'    shift, and go to state 119
+    '*'    shift, and go to state 120
+    '/'    shift, and go to state 121
+    '%'    shift, and go to state 122
+    ')'    shift, and go to state 193
+
+
+State 152
+
+   27 CMD_FUNC: FUNCTION NOME_FUNCAO '(' • EMPILHA_TS_FUNC LISTA_PARAMs ')' '{' CMDs '}' DESEMPILHA_TS_FUNC
+
+    $default  reduce using rule 25 (EMPILHA_TS_FUNC)
+
+    EMPILHA_TS_FUNC  go to state 194
+
+
+State 153
+
+   67 LIST: '[' LISTVALS ']' •
+
+    $default  reduce using rule 67 (LIST)
+
+
+State 154
+
+   69 LISTVALS: LISTVAL ',' • LISTVALS
+
+    ID           shift, and go to state 68
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 69
+
+    LVALUEPROP  go to state 70
+    LIST        go to state 37
+    LISTVALS    go to state 195
+    LISTVAL     go to state 83
+    E           go to state 84
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 155
+
+   35 PARAM: ID '=' • EOBJ
+   72 ATRIB: ID '=' • ATRIB
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    '{'          shift, and go to state 131
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 196
+    EOBJ        go to state 197
+    ECOND       go to state 40
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 156
+
+   80 ATRIB: '(' LISTA_PARAMs FECHA_PARENTESES_LAMBDA • SETA ATRIB
+   81      | '(' LISTA_PARAMs FECHA_PARENTESES_LAMBDA • SETA BLOCO
+
+    SETA  shift, and go to state 198
+
+
+State 157
+
+   30 LISTA_PARAMs: PARAMs ',' •
+   32 PARAMs: PARAMs ',' • PARAM
+
+    ID  shift, and go to state 199
+
+    $default  reduce using rule 30 (LISTA_PARAMs)
+
+    PARAM  go to state 200
+
+
+State 158
+
+   85 EVG: ATRIB ',' • EVG
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 89
+    EVG         go to state 201
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 159
+
+  118 F: '(' EVG ')' •
+
+    $default  reduce using rule 118 (F)
+
+
+State 160
+
+  125 CHAMA_FUNC: '(' E ')' • '(' LISTA_ARGS ')'
+
+    '('  shift, and go to state 202
+
+
+State 161
+
+   92 CAMPO: ID ':' • EOBJ
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    '{'          shift, and go to state 131
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 132
+    EOBJ        go to state 203
+    ECOND       go to state 40
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 162
+
+    3 CMDs: CMDs • CMD
+   19 BLOCO: '{' START_BLOCO CMDs • '}' END_BLOCO
+
+    ID           shift, and go to state 1
+    IF           shift, and go to state 2
+    LET          shift, and go to state 3
+    CONST        shift, and go to state 4
+    VAR          shift, and go to state 5
+    FOR          shift, and go to state 6
+    WHILE        shift, and go to state 7
+    FUNCTION     shift, and go to state 8
+    RETURN       shift, and go to state 9
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    ';'          shift, and go to state 20
+    '{'          shift, and go to state 21
+    '}'          shift, and go to state 204
+
+    CMD          go to state 98
+    BLOCO_VAZIO  go to state 25
+    BLOCO        go to state 26
+    CMD_RET      go to state 27
+    CMD_ASM      go to state 28
+    CMD_FUNC     go to state 29
+    CMD_FOR      go to state 30
+    CMD_WHILE    go to state 31
+    CMD_LET      go to state 32
+    CMD_VAR      go to state 33
+    CMD_CONST    go to state 34
+    CMD_IF       go to state 35
+    LVALUEPROP   go to state 36
+    LIST         go to state 37
+    ATRIB        go to state 38
+    EOBJ         go to state 39
+    ECOND        go to state 40
+    E            go to state 41
+    UN           go to state 42
+    F            go to state 43
+    CHAMA_FUNC   go to state 44
+
+
+State 163
+
+   83 EOBJ: '{' CAMPOS '}' •
+
+    $default  reduce using rule 83 (EOBJ)
+
+
+State 164
+
+   89 CAMPOS: CAMPO ',' • CAMPOS
+
+    ID  shift, and go to state 92
+
+    $default  reduce using rule 91 (CAMPOS)
+
+    CAMPOS  go to state 205
+    CAMPO   go to state 96
+
+
+State 165
+
+   76 ATRIB: LVALUEPROP MAIS_IGUAL ATRIB •
+
+    $default  reduce using rule 76 (ATRIB)
+
+
+State 166
+
+   77 ATRIB: LVALUEPROP MENOS_IGUAL ATRIB •
+
+    $default  reduce using rule 77 (ATRIB)
+
+
+State 167
+
+   75 ATRIB: LVALUEPROP '=' ATRIB •
+
+    $default  reduce using rule 75 (ATRIB)
+
+
+State 168
+
+   61 LVALUEPROP: LVALUEPROP '[' EOBJ • ']'
+
+    ']'  shift, and go to state 206
+
+
+State 169
+
+  124 CHAMA_FUNC: LVALUEPROP '(' LISTA_ARGS • ')'
+
+    ')'  shift, and go to state 207
+
+
+State 170
+
+   62 LVALUEPROP: LVALUEPROP '.' ID •
+
+    $default  reduce using rule 62 (LVALUEPROP)
+
+
+State 171
+
+   87 ECOND: ECOND '?' EOBJ • ':' EOBJ
+
+    ':'  shift, and go to state 208
+
+
+State 172
+
+   96 E: E • IGUAL E
+   96  | E IGUAL E •
+   97  | E • '<' E
+   98  | E • '>' E
+   99  | E • '+' E
+  100  | E • '-' E
+  101  | E • '*' E
+  102  | E • '/' E
+  103  | E • '%' E
+
+    '<'  shift, and go to state 116
+    '>'  shift, and go to state 117
+    '+'  shift, and go to state 118
+    '-'  shift, and go to state 119
+    '*'  shift, and go to state 120
+    '/'  shift, and go to state 121
+    '%'  shift, and go to state 122
+
+    IGUAL  error (nonassociative)
+
+    $default  reduce using rule 96 (E)
+
+
+State 173
+
+   96 E: E • IGUAL E
+   97  | E • '<' E
+   97  | E '<' E •
+   98  | E • '>' E
+   99  | E • '+' E
+  100  | E • '-' E
+  101  | E • '*' E
+  102  | E • '/' E
+  103  | E • '%' E
+
+    '+'  shift, and go to state 118
+    '-'  shift, and go to state 119
+    '*'  shift, and go to state 120
+    '/'  shift, and go to state 121
+    '%'  shift, and go to state 122
+
+    '<'  error (nonassociative)
+    '>'  error (nonassociative)
+
+    $default  reduce using rule 97 (E)
+
+
+State 174
+
+   96 E: E • IGUAL E
+   97  | E • '<' E
+   98  | E • '>' E
+   98  | E '>' E •
+   99  | E • '+' E
+  100  | E • '-' E
+  101  | E • '*' E
+  102  | E • '/' E
+  103  | E • '%' E
+
+    '+'  shift, and go to state 118
+    '-'  shift, and go to state 119
+    '*'  shift, and go to state 120
+    '/'  shift, and go to state 121
+    '%'  shift, and go to state 122
+
+    '<'  error (nonassociative)
+    '>'  error (nonassociative)
+
+    $default  reduce using rule 98 (E)
+
+
+State 175
+
+   96 E: E • IGUAL E
+   97  | E • '<' E
+   98  | E • '>' E
+   99  | E • '+' E
+   99  | E '+' E •
+  100  | E • '-' E
+  101  | E • '*' E
+  102  | E • '/' E
+  103  | E • '%' E
+
+    '*'  shift, and go to state 120
+    '/'  shift, and go to state 121
+    '%'  shift, and go to state 122
+
+    $default  reduce using rule 99 (E)
+
+
+State 176
+
+   96 E: E • IGUAL E
+   97  | E • '<' E
+   98  | E • '>' E
+   99  | E • '+' E
+  100  | E • '-' E
+  100  | E '-' E •
+  101  | E • '*' E
+  102  | E • '/' E
+  103  | E • '%' E
+
+    '*'  shift, and go to state 120
+    '/'  shift, and go to state 121
+    '%'  shift, and go to state 122
+
+    $default  reduce using rule 100 (E)
+
+
+State 177
+
+   96 E: E • IGUAL E
+   97  | E • '<' E
+   98  | E • '>' E
+   99  | E • '+' E
+  100  | E • '-' E
+  101  | E • '*' E
+  101  | E '*' E •
+  102  | E • '/' E
+  103  | E • '%' E
+
+    $default  reduce using rule 101 (E)
+
+
+State 178
+
+   96 E: E • IGUAL E
+   97  | E • '<' E
+   98  | E • '>' E
+   99  | E • '+' E
+  100  | E • '-' E
+  101  | E • '*' E
+  102  | E • '/' E
+  102  | E '/' E •
+  103  | E • '%' E
+
+    $default  reduce using rule 102 (E)
+
+
+State 179
+
+   96 E: E • IGUAL E
+   97  | E • '<' E
+   98  | E • '>' E
+   99  | E • '+' E
+  100  | E • '-' E
+  101  | E • '*' E
+  102  | E • '/' E
+  103  | E • '%' E
+  103  | E '%' E •
+
+    $default  reduce using rule 103 (E)
+
+
+State 180
+
+   63 LVALUEPROP: F '[' EOBJ • ']'
+
+    ']'  shift, and go to state 209
+
+
+State 181
+
+   64 LVALUEPROP: F '.' ID •
+
+    $default  reduce using rule 64 (LVALUEPROP)
+
+
+State 182
+
+   65 LVALUEPROP: ID '[' EOBJ ']' •
+
+    $default  reduce using rule 65 (LVALUEPROP)
+
+
+State 183
+
+  123 CHAMA_FUNC: ID '(' LISTA_ARGS ')' •
+
+    $default  reduce using rule 123 (CHAMA_FUNC)
+
+
+State 184
+
+  127 LISTA_ARGS: ARGs ',' •
+  130 ARGs: ARGs ',' • ATRIB
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+
+    $default  reduce using rule 127 (LISTA_ARGS)
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 210
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 185
+
+   59 CMD_IF: IF '(' E ')' • CMD
+   60       | IF '(' E ')' • CMD ELSE CMD
+
+    ID           shift, and go to state 1
+    IF           shift, and go to state 2
+    LET          shift, and go to state 3
+    CONST        shift, and go to state 4
+    VAR          shift, and go to state 5
+    FOR          shift, and go to state 6
+    WHILE        shift, and go to state 7
+    FUNCTION     shift, and go to state 8
+    RETURN       shift, and go to state 9
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    ';'          shift, and go to state 20
+    '{'          shift, and go to state 21
+
+    CMD          go to state 211
+    BLOCO_VAZIO  go to state 25
+    BLOCO        go to state 26
+    CMD_RET      go to state 27
+    CMD_ASM      go to state 28
+    CMD_FUNC     go to state 29
+    CMD_FOR      go to state 30
+    CMD_WHILE    go to state 31
+    CMD_LET      go to state 32
+    CMD_VAR      go to state 33
+    CMD_CONST    go to state 34
+    CMD_IF       go to state 35
+    LVALUEPROP   go to state 36
+    LIST         go to state 37
+    ATRIB        go to state 38
+    EOBJ         go to state 39
+    ECOND        go to state 40
+    E            go to state 41
+    UN           go to state 42
+    F            go to state 43
+    CHAMA_FUNC   go to state 44
+
+
+State 186
+
+   48 LET_VAR: ID '=' EOBJ •
+
+    $default  reduce using rule 48 (LET_VAR)
+
+
+State 187
+
+   45 LET_VARs: LET_VAR ',' LET_VARs •
+
+    $default  reduce using rule 45 (LET_VARs)
+
+
+State 188
+
+   58 CONST_VAR: ID '=' E •
+   96 E: E • IGUAL E
+   97  | E • '<' E
+   98  | E • '>' E
+   99  | E • '+' E
+  100  | E • '-' E
+  101  | E • '*' E
+  102  | E • '/' E
+  103  | E • '%' E
+
+    IGUAL  shift, and go to state 115
+    '<'    shift, and go to state 116
+    '>'    shift, and go to state 117
+    '+'    shift, and go to state 118
+    '-'    shift, and go to state 119
+    '*'    shift, and go to state 120
+    '/'    shift, and go to state 121
+    '%'    shift, and go to state 122
+
+    $default  reduce using rule 58 (CONST_VAR)
+
+
+State 189
+
+   55 CONST_VARs: CONST_VAR ',' CONST_VARs •
+
+    $default  reduce using rule 55 (CONST_VARs)
+
+
+State 190
+
+   53 VAR_VAR: ID '=' E •
+   96 E: E • IGUAL E
+   97  | E • '<' E
+   98  | E • '>' E
+   99  | E • '+' E
+  100  | E • '-' E
+  101  | E • '*' E
+  102  | E • '/' E
+  103  | E • '%' E
+
+    IGUAL  shift, and go to state 115
+    '<'    shift, and go to state 116
+    '>'    shift, and go to state 117
+    '+'    shift, and go to state 118
+    '-'    shift, and go to state 119
+    '*'    shift, and go to state 120
+    '/'    shift, and go to state 121
+    '%'    shift, and go to state 122
+
+    $default  reduce using rule 53 (VAR_VAR)
+
+
+State 191
+
+   50 VAR_VARs: VAR_VAR ',' VAR_VARs •
+
+    $default  reduce using rule 50 (VAR_VARs)
+
+
+State 192
+
+   36 CMD_FOR: FOR '(' SF ';' • E ';' EF ')' CMD
+
+    ID           shift, and go to state 68
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 69
+
+    LVALUEPROP  go to state 70
+    LIST        go to state 37
+    E           go to state 212
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 193
+
+   43 CMD_WHILE: WHILE '(' E ')' • CMD
+
+    ID           shift, and go to state 1
+    IF           shift, and go to state 2
+    LET          shift, and go to state 3
+    CONST        shift, and go to state 4
+    VAR          shift, and go to state 5
+    FOR          shift, and go to state 6
+    WHILE        shift, and go to state 7
+    FUNCTION     shift, and go to state 8
+    RETURN       shift, and go to state 9
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    ';'          shift, and go to state 20
+    '{'          shift, and go to state 21
+
+    CMD          go to state 213
+    BLOCO_VAZIO  go to state 25
+    BLOCO        go to state 26
+    CMD_RET      go to state 27
+    CMD_ASM      go to state 28
+    CMD_FUNC     go to state 29
+    CMD_FOR      go to state 30
+    CMD_WHILE    go to state 31
+    CMD_LET      go to state 32
+    CMD_VAR      go to state 33
+    CMD_CONST    go to state 34
+    CMD_IF       go to state 35
+    LVALUEPROP   go to state 36
+    LIST         go to state 37
+    ATRIB        go to state 38
+    EOBJ         go to state 39
+    ECOND        go to state 40
+    E            go to state 41
+    UN           go to state 42
+    F            go to state 43
+    CHAMA_FUNC   go to state 44
+
+
+State 194
+
+   27 CMD_FUNC: FUNCTION NOME_FUNCAO '(' EMPILHA_TS_FUNC • LISTA_PARAMs ')' '{' CMDs '}' DESEMPILHA_TS_FUNC
+
+    ID  shift, and go to state 199
+
+    $default  reduce using rule 31 (LISTA_PARAMs)
+
+    LISTA_PARAMs  go to state 214
+    PARAMs        go to state 87
+    PARAM         go to state 88
+
+
+State 195
+
+   69 LISTVALS: LISTVAL ',' LISTVALS •
+
+    $default  reduce using rule 69 (LISTVALS)
+
+
+State 196
+
+   72 ATRIB: ID '=' ATRIB •
+   88 ECOND: ATRIB •
+
+    FECHA_PARENTESES_LAMBDA  reduce using rule 88 (ECOND)
+    ','                      reduce using rule 72 (ATRIB)
+    ','                      [reduce using rule 88 (ECOND)]
+    '?'                      reduce using rule 88 (ECOND)
+    $default                 reduce using rule 72 (ATRIB)
+
+
+State 197
+
+   35 PARAM: ID '=' EOBJ •
+
+    $default  reduce using rule 35 (PARAM)
+
+
+State 198
+
+   80 ATRIB: '(' LISTA_PARAMs FECHA_PARENTESES_LAMBDA SETA • ATRIB
+   81      | '(' LISTA_PARAMs FECHA_PARENTESES_LAMBDA SETA • BLOCO
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    '{'          shift, and go to state 127
+
+    BLOCO       go to state 215
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 216
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 199
+
+   34 PARAM: ID •
+   35      | ID • '=' EOBJ
+
+    '='  shift, and go to state 217
+
+    $default  reduce using rule 34 (PARAM)
+
+
+State 200
+
+   32 PARAMs: PARAMs ',' PARAM •
+
+    $default  reduce using rule 32 (PARAMs)
+
+
+State 201
+
+   85 EVG: ATRIB ',' EVG •
+
+    $default  reduce using rule 85 (EVG)
+
+
+State 202
+
+  125 CHAMA_FUNC: '(' E ')' '(' • LISTA_ARGS ')'
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+
+    $default  reduce using rule 128 (LISTA_ARGS)
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 134
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+    LISTA_ARGS  go to state 218
+    ARGs        go to state 136
+
+
+State 203
+
+   92 CAMPO: ID ':' EOBJ •
+
+    $default  reduce using rule 92 (CAMPO)
+
+
+State 204
+
+   19 BLOCO: '{' START_BLOCO CMDs '}' • END_BLOCO
+
+    $default  reduce using rule 21 (END_BLOCO)
+
+    END_BLOCO  go to state 219
+
+
+State 205
+
+   89 CAMPOS: CAMPO ',' CAMPOS •
+
+    $default  reduce using rule 89 (CAMPOS)
+
+
+State 206
+
+   61 LVALUEPROP: LVALUEPROP '[' EOBJ ']' •
+
+    $default  reduce using rule 61 (LVALUEPROP)
+
+
+State 207
+
+  124 CHAMA_FUNC: LVALUEPROP '(' LISTA_ARGS ')' •
+
+    $default  reduce using rule 124 (CHAMA_FUNC)
+
+
+State 208
+
+   87 ECOND: ECOND '?' EOBJ ':' • EOBJ
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    '{'          shift, and go to state 131
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 132
+    EOBJ        go to state 220
+    ECOND       go to state 40
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 209
+
+   63 LVALUEPROP: F '[' EOBJ ']' •
+
+    $default  reduce using rule 63 (LVALUEPROP)
+
+
+State 210
+
+  130 ARGs: ARGs ',' ATRIB •
+
+    $default  reduce using rule 130 (ARGs)
+
+
+State 211
+
+   59 CMD_IF: IF '(' E ')' CMD •
+   60       | IF '(' E ')' CMD • ELSE CMD
+
+    ELSE  shift, and go to state 221
+
+    ELSE      [reduce using rule 59 (CMD_IF)]
+    $default  reduce using rule 59 (CMD_IF)
+
+
+State 212
+
+   36 CMD_FOR: FOR '(' SF ';' E • ';' EF ')' CMD
+   96 E: E • IGUAL E
+   97  | E • '<' E
+   98  | E • '>' E
+   99  | E • '+' E
+  100  | E • '-' E
+  101  | E • '*' E
+  102  | E • '/' E
+  103  | E • '%' E
+
+    IGUAL  shift, and go to state 115
+    '<'    shift, and go to state 116
+    '>'    shift, and go to state 117
+    '+'    shift, and go to state 118
+    '-'    shift, and go to state 119
+    '*'    shift, and go to state 120
+    '/'    shift, and go to state 121
+    '%'    shift, and go to state 122
+    ';'    shift, and go to state 222
+
+
+State 213
+
+   43 CMD_WHILE: WHILE '(' E ')' CMD •
+
+    $default  reduce using rule 43 (CMD_WHILE)
+
+
+State 214
+
+   27 CMD_FUNC: FUNCTION NOME_FUNCAO '(' EMPILHA_TS_FUNC LISTA_PARAMs • ')' '{' CMDs '}' DESEMPILHA_TS_FUNC
+
+    ')'  shift, and go to state 223
+
+
+State 215
+
+   81 ATRIB: '(' LISTA_PARAMs FECHA_PARENTESES_LAMBDA SETA BLOCO •
+
+    $default  reduce using rule 81 (ATRIB)
+
+
+State 216
+
+   80 ATRIB: '(' LISTA_PARAMs FECHA_PARENTESES_LAMBDA SETA ATRIB •
+
+    $default  reduce using rule 80 (ATRIB)
+
+
+State 217
+
+   35 PARAM: ID '=' • EOBJ
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    '{'          shift, and go to state 131
+
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 132
+    EOBJ        go to state 197
+    ECOND       go to state 40
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 218
+
+  125 CHAMA_FUNC: '(' E ')' '(' LISTA_ARGS • ')'
+
+    ')'  shift, and go to state 224
+
+
+State 219
+
+   19 BLOCO: '{' START_BLOCO CMDs '}' END_BLOCO •
+
+    $default  reduce using rule 19 (BLOCO)
+
+
+State 220
+
+   87 ECOND: ECOND '?' EOBJ ':' EOBJ •
+
+    $default  reduce using rule 87 (ECOND)
+
+
+State 221
+
+   60 CMD_IF: IF '(' E ')' CMD ELSE • CMD
+
+    ID           shift, and go to state 1
+    IF           shift, and go to state 2
+    LET          shift, and go to state 3
+    CONST        shift, and go to state 4
+    VAR          shift, and go to state 5
+    FOR          shift, and go to state 6
+    WHILE        shift, and go to state 7
+    FUNCTION     shift, and go to state 8
+    RETURN       shift, and go to state 9
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    ';'          shift, and go to state 20
+    '{'          shift, and go to state 21
+
+    CMD          go to state 225
+    BLOCO_VAZIO  go to state 25
+    BLOCO        go to state 26
+    CMD_RET      go to state 27
+    CMD_ASM      go to state 28
+    CMD_FUNC     go to state 29
+    CMD_FOR      go to state 30
+    CMD_WHILE    go to state 31
+    CMD_LET      go to state 32
+    CMD_VAR      go to state 33
+    CMD_CONST    go to state 34
+    CMD_IF       go to state 35
+    LVALUEPROP   go to state 36
+    LIST         go to state 37
+    ATRIB        go to state 38
+    EOBJ         go to state 39
+    ECOND        go to state 40
+    E            go to state 41
+    UN           go to state 42
+    F            go to state 43
+    CHAMA_FUNC   go to state 44
+
+
+State 222
+
+   36 CMD_FOR: FOR '(' SF ';' E ';' • EF ')' CMD
+
+    ID           shift, and go to state 1
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+
+    $default  reduce using rule 38 (EF)
+
+    EF          go to state 226
+    LVALUEPROP  go to state 36
+    LIST        go to state 37
+    ATRIB       go to state 150
+    E           go to state 41
+    UN          go to state 42
+    F           go to state 43
+    CHAMA_FUNC  go to state 44
+
+
+State 223
+
+   27 CMD_FUNC: FUNCTION NOME_FUNCAO '(' EMPILHA_TS_FUNC LISTA_PARAMs ')' • '{' CMDs '}' DESEMPILHA_TS_FUNC
+
+    '{'  shift, and go to state 227
+
+
+State 224
+
+  125 CHAMA_FUNC: '(' E ')' '(' LISTA_ARGS ')' •
+
+    $default  reduce using rule 125 (CHAMA_FUNC)
+
+
+State 225
+
+   60 CMD_IF: IF '(' E ')' CMD ELSE CMD •
+
+    $default  reduce using rule 60 (CMD_IF)
+
+
+State 226
+
+   36 CMD_FOR: FOR '(' SF ';' E ';' EF • ')' CMD
+
+    ')'  shift, and go to state 228
+
+
+State 227
+
+   27 CMD_FUNC: FUNCTION NOME_FUNCAO '(' EMPILHA_TS_FUNC LISTA_PARAMs ')' '{' • CMDs '}' DESEMPILHA_TS_FUNC
+
+    ID           shift, and go to state 1
+    IF           shift, and go to state 2
+    LET          shift, and go to state 3
+    CONST        shift, and go to state 4
+    VAR          shift, and go to state 5
+    FOR          shift, and go to state 6
+    WHILE        shift, and go to state 7
+    FUNCTION     shift, and go to state 8
+    RETURN       shift, and go to state 9
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    ';'          shift, and go to state 20
+    '{'          shift, and go to state 21
+
+    CMDs         go to state 229
+    CMD          go to state 24
+    BLOCO_VAZIO  go to state 25
+    BLOCO        go to state 26
+    CMD_RET      go to state 27
+    CMD_ASM      go to state 28
+    CMD_FUNC     go to state 29
+    CMD_FOR      go to state 30
+    CMD_WHILE    go to state 31
+    CMD_LET      go to state 32
+    CMD_VAR      go to state 33
+    CMD_CONST    go to state 34
+    CMD_IF       go to state 35
+    LVALUEPROP   go to state 36
+    LIST         go to state 37
+    ATRIB        go to state 38
+    EOBJ         go to state 39
+    ECOND        go to state 40
+    E            go to state 41
+    UN           go to state 42
+    F            go to state 43
+    CHAMA_FUNC   go to state 44
+
+
+State 228
+
+   36 CMD_FOR: FOR '(' SF ';' E ';' EF ')' • CMD
+
+    ID           shift, and go to state 1
+    IF           shift, and go to state 2
+    LET          shift, and go to state 3
+    CONST        shift, and go to state 4
+    VAR          shift, and go to state 5
+    FOR          shift, and go to state 6
+    WHILE        shift, and go to state 7
+    FUNCTION     shift, and go to state 8
+    RETURN       shift, and go to state 9
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    ';'          shift, and go to state 20
+    '{'          shift, and go to state 21
+
+    CMD          go to state 230
+    BLOCO_VAZIO  go to state 25
+    BLOCO        go to state 26
+    CMD_RET      go to state 27
+    CMD_ASM      go to state 28
+    CMD_FUNC     go to state 29
+    CMD_FOR      go to state 30
+    CMD_WHILE    go to state 31
+    CMD_LET      go to state 32
+    CMD_VAR      go to state 33
+    CMD_CONST    go to state 34
+    CMD_IF       go to state 35
+    LVALUEPROP   go to state 36
+    LIST         go to state 37
+    ATRIB        go to state 38
+    EOBJ         go to state 39
+    ECOND        go to state 40
+    E            go to state 41
+    UN           go to state 42
+    F            go to state 43
+    CHAMA_FUNC   go to state 44
+
+
+State 229
+
+    3 CMDs: CMDs • CMD
+   27 CMD_FUNC: FUNCTION NOME_FUNCAO '(' EMPILHA_TS_FUNC LISTA_PARAMs ')' '{' CMDs • '}' DESEMPILHA_TS_FUNC
+
+    ID           shift, and go to state 1
+    IF           shift, and go to state 2
+    LET          shift, and go to state 3
+    CONST        shift, and go to state 4
+    VAR          shift, and go to state 5
+    FOR          shift, and go to state 6
+    WHILE        shift, and go to state 7
+    FUNCTION     shift, and go to state 8
+    RETURN       shift, and go to state 9
+    CDOUBLE      shift, and go to state 10
+    CSTRING      shift, and go to state 11
+    CINT         shift, and go to state 12
+    CBOOL        shift, and go to state 13
+    MAIS_MAIS    shift, and go to state 14
+    MENOS_MENOS  shift, and go to state 15
+    '+'          shift, and go to state 16
+    '-'          shift, and go to state 17
+    '['          shift, and go to state 18
+    '('          shift, and go to state 19
+    ';'          shift, and go to state 20
+    '{'          shift, and go to state 21
+    '}'          shift, and go to state 231
+
+    CMD          go to state 98
+    BLOCO_VAZIO  go to state 25
+    BLOCO        go to state 26
+    CMD_RET      go to state 27
+    CMD_ASM      go to state 28
+    CMD_FUNC     go to state 29
+    CMD_FOR      go to state 30
+    CMD_WHILE    go to state 31
+    CMD_LET      go to state 32
+    CMD_VAR      go to state 33
+    CMD_CONST    go to state 34
+    CMD_IF       go to state 35
+    LVALUEPROP   go to state 36
+    LIST         go to state 37
+    ATRIB        go to state 38
+    EOBJ         go to state 39
+    ECOND        go to state 40
+    E            go to state 41
+    UN           go to state 42
+    F            go to state 43
+    CHAMA_FUNC   go to state 44
+
+
+State 230
+
+   36 CMD_FOR: FOR '(' SF ';' E ';' EF ')' CMD •
+
+    $default  reduce using rule 36 (CMD_FOR)
+
+
+State 231
+
+   27 CMD_FUNC: FUNCTION NOME_FUNCAO '(' EMPILHA_TS_FUNC LISTA_PARAMs ')' '{' CMDs '}' • DESEMPILHA_TS_FUNC
+
+    $default  reduce using rule 26 (DESEMPILHA_TS_FUNC)
+
+    DESEMPILHA_TS_FUNC  go to state 232
+
+
+State 232
+
+   27 CMD_FUNC: FUNCTION NOME_FUNCAO '(' EMPILHA_TS_FUNC LISTA_PARAMs ')' '{' CMDs '}' DESEMPILHA_TS_FUNC •
+
+    $default  reduce using rule 27 (CMD_FUNC)
