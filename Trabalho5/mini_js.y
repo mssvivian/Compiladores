@@ -187,7 +187,7 @@ void desempilha_escopo();
 
 
 %left ','
-%nonassoc MAIS_IGUAL
+%nonassoc MAIS_IGUAL MENOS_IGUAL
 
 %right '='  SETA':'
 %left OR
@@ -196,7 +196,7 @@ void desempilha_escopo();
 %nonassoc '<' '>' ME_IG MA_IG
 %left '+' '-'
 %left '*' '/' '%'
-%right MAIS_MAIS
+%right MAIS_MAIS MENOS_MENOS
 %right '[' '('
 %left '.'
 
@@ -246,6 +246,10 @@ END_BLOCO : {desempilha_escopo();}
 
 CMD_RET : RETURN 
           { 
+            if(blocos_alinhados_em_funcao.size() == 0) {
+              cerr << "Erro: Não é permitido 'return' fora de funções." << endl;
+              exit(1);
+            }
             $$.c = vector<string>{"undefined"}; /* 1. Empilha undefined */
             
             for( int i = 0; i <  blocos_alinhados_em_funcao.back(); i++ )
@@ -255,6 +259,10 @@ CMD_RET : RETURN
           }
       | RETURN E 
           { 
+            if(blocos_alinhados_em_funcao.size() == 0) {
+              cerr << "Erro: Não é permitido 'return' fora de funções." << endl;
+              exit(1);
+            }
             $$.c = $2.c; /* 1. Empilha o valor da expressão E */
             
             for( int i = 0; i <  blocos_alinhados_em_funcao.back(); i++ )
@@ -265,7 +273,7 @@ CMD_RET : RETURN
           }
         ;
 
-CMD_ASM : EOBJ ASM { $$.c = $1.c + $2.c + "^"; }
+CMD_ASM : E ASM { $$.c = $1.c + $2.c + "^"; }
         ;
 
 EMPILHA_TS_FUNC : { ts.push_back( map< string, Simbolo >{} ); 
@@ -358,7 +366,7 @@ PARAMs : PARAMs ',' PARAM
                      $1.valor_default + "=" + "^" +
                      define_label(lbl_fim_default);
          }
-
+         
          $$.n_args = 1; 
        }
      ;
@@ -374,7 +382,7 @@ PARAM : ID
         $$.valor_default = $3.c; }
     ;
 
-CMD_FOR : FOR '(' SF ';' E ';' EF ')' CMD 
+CMD_FOR : FOR '(' SF ';' ECOND_OPT ';' EF ')' CMD 
         { string teste_for = gera_label( "teste_for" );
           string fim_for = gera_label( "fim_for" );
           
@@ -384,8 +392,12 @@ CMD_FOR : FOR '(' SF ';' E ';' EF ')' CMD
         }
         ;
 
+ECOND_OPT : E
+          | { $$.c = vector<string>{"1"}; }
+          ;
+
 EF : ATRIB
-      { $$.c = $1.c + "^"; };
+      { $$.c = $1.c + "^"; }
     | { $$.clear(); }
     ;
 
@@ -503,15 +515,31 @@ LVALUEPROP : LVALUEPROP '[' EOBJ ']'
                } // var.prop
            ;
 
-LIST  : '[' LISTVALS ']' { $$.c = $1.c + $2.c + $3.c; }
+LIST  : '[' LISTVALS ']' 
+        { 
+          $$.c = vector<string>{"[]"};
+          $$.c += $2.c;
+        }
       | '[' ']' { $$.c = vector<string>{"[]"}; }
       ;
 
-LISTVALS : LISTVAL ',' LISTVALS   { $$.c = $1.c + $3.c; }
+LISTVALS : LISTVAL ',' LISTVALS   
+         { 
+           $$.c = $1.c + to_string($1.n_args) + $3.c; 
+           $$.n_args = $1.n_args + 1;
+         }
          | LISTVAL
+         {
+           $$.c = $1.c ;
+           $$.n_args = 1;
+         }
          ;
 
-LISTVAL : E
+LISTVAL : EOBJ
+        { 
+          $$.c = $1.c + "[<=]";
+          $$.n_args = 0;  // será preenchido por LISTVALS
+        }
         ;
 
 ATRIB
@@ -542,9 +570,35 @@ ATRIB
                   esq + "@" + dir + "@" + "[@]" +
                   $3.c + "-" + "[=]" ;}
   | ID SETA BLOCO
+    {
+      string endereco_funcao = gera_label( "func_arrow_" + $1.c[0] );
+      $$.c = vector<string>{"{}"} + "'&funcao'" + endereco_funcao + "[<=]";
+      funcoes = funcoes + define_label(endereco_funcao) + $1.c + "&" + $1.c + 
+                "arguments" + "@" + "0" + "[@]" + "=" + "^" + $3.c +
+                "undefined" + "'&retorno'" + "@" + "~";
+    }
   | ID SETA ATRIB
+    {
+      string endereco_funcao = gera_label( "func_arrow_" + $1.c[0] );
+      $$.c = vector<string>{"{}"} + "'&funcao'" + endereco_funcao + "[<=]";
+      funcoes = funcoes + define_label(endereco_funcao) + $1.c + "&" + $1.c + 
+                "arguments" + "@" + "0" + "[@]" + "=" + "^" + $3.c +
+                "'&retorno'" + "@" + "~";
+    }
   | '(' LISTA_PARAMs FECHA_PARENTESES_LAMBDA SETA ATRIB
+    {
+      string endereco_funcao = gera_label( "func_arrow" );
+      $$.c = vector<string>{"{}"} + "'&funcao'" + endereco_funcao + "[<=]";
+      funcoes = funcoes + define_label(endereco_funcao) + $2.c + $5.c +
+                "'&retorno'" + "@" + "~";
+    }
   | '(' LISTA_PARAMs FECHA_PARENTESES_LAMBDA SETA BLOCO
+    {
+      string endereco_funcao = gera_label( "func_arrow" );
+      $$.c = vector<string>{"{}"} + "'&funcao'" + endereco_funcao + "[<=]";
+      funcoes = funcoes + define_label(endereco_funcao) + $2.c + $5.c +
+                "undefined" + "'&retorno'" + "@" + "~";
+    }
   | E
   ;
   /*| ID '=' '{' '}'
@@ -555,25 +609,35 @@ ATRIB
   ; */
 
 EOBJ : '{' CAMPOS '}'
+    { 
+      $$.c = vector<string>{"{}"};
+      if($2.c.size() > 0) {
+        $$.c += $2.c;
+      }
+    }
+     | '{'  '}'
     { $$.c = vector<string>{"{}"}; }
      | ECOND
      ;
 
-EVG : ATRIB ',' EVG 
-    | ATRIB
-    ;
+EXPR_VIRGULA : ATRIB
+             | ATRIB ',' EXPR_VIRGULA
+               { $$.c = $1.c + $3.c; }  // $1 é descartado, retorna $3
+             ;
 
 ECOND : ECOND '?' EOBJ ':' EOBJ
       | ATRIB
       ;
 
 CAMPOS : CAMPO ',' CAMPOS
+       { $$.c = $1.c + $3.c; }
        | CAMPO
-       |
        ;
 
 CAMPO : ID ':' EOBJ
+      { $$.c = "'" + $1.c[0] + "'" + $3.c + "[<=]"; }
       | ID
+      { $$.c = "'" + $1.c[0] + "'" + $1.c + "@" + "[<=]"; }
       ; 
 
 E : ID
@@ -652,7 +716,7 @@ F :   CDOUBLE
     | CINT
     | CSTRING
     | CBOOL
-    | '(' EVG ')' { $$.c = $2.c; }
+   // | '(' EXPR_VIRGULA ')' { $$.c = $2.c; }
     | LIST
     | '-' F 
       { $$.c = "0" + $2.c + "-" ; }
