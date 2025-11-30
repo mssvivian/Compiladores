@@ -1,16 +1,13 @@
-function log( msg ) {
-  msg asm{println # undefined};
+let log = msg => msg asm{println # undefined};
+let f = [];
+
+{
+  let i;
+
+  for( i = 0; i < 3; i++ )
+    f[i] = () => log(i);
 }
-
-function map( a, f ) {
-  let res = [];
-
-  forEach( a, (x,j) => (res[j] = f(x)) );
-
-  return res;
-}
-
-function forEach( array, funcao ) {
-  for( let i = 0; i < array.size; i = i + 1 )
-    funcao( array[i], i );
+{
+  for( let j = 0; j < 3; j++ )
+    f[j]();
 }

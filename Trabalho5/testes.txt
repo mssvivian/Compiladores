@@ -1,4 +1,4 @@
-Test 1: #1 Bloco vazio
+Test 1: #1 Bloco vazio ok 
 --- Input ---
 let i;
 for( i = 0; i < 10; i++ ) {}
@@ -9,7 +9,7 @@ for( i = 0; i < 10; i++ ) {}
 |{ i: 10; undefined: undefined; }|
 === Pilha ===
 
-Test 2: #2 objetos literais
+Test 2: #2 objetos literais ok 
 --- Input ---
 let o = {
   campo: 'aba',
@@ -29,7 +29,7 @@ let o = {
 === Pilha ===
 |0|
 
-Test 3: #3 arrays
+Test 3: #3 arrays ok 
 --- Input ---
 function log( msg, i ) {
   msg asm{println # undefined};
@@ -48,7 +48,7 @@ console.log( console.teste );
 |{ console: { log: { &funcao: ##; }; teste: [ 0: aba; 1: cate; ]; }; log: { &funcao: ##; }; undefined: undefined; }|
 === Pilha ===
 
-Test 4: #4 arrays e objetos
+Test 4: #4 arrays e objetos RESOLVER
 function log( msg ) {
   msg asm{println # undefined};
 }
@@ -77,7 +77,7 @@ log( obj.a[obj.a[1].teste+1] );
 === Pilha ===
 "
 
-Test 5: #5 Função anônima
+Test 5: #5 Função anônima ok 
 --- Input ---
 let par = function( n ) {
   if( n % 2 == 0 )
@@ -94,7 +94,7 @@ let a = par( 4 );
 |{ a: true; par: { &funcao: ##; }; undefined: undefined; }|
 === Pilha ===
 
-Test 6: #6 Função seta. map, forEach
+Test 6: #6 Função seta. map, forEach ok 
 --- Input ---
 function log( msg ) {
   msg asm{println # undefined};
@@ -123,7 +123,7 @@ log( map( a, x => x*x + 1 ) );
 |{ a: [ 0: 1; 1: 2; 2: 3; 3: 4; ]; forEach: { &funcao: ##; }; log: { &funcao: ##; }; map: { &funcao: ##; }; undefined: undefined; }|
 === Pilha ===
 
-Test 7: #7 reduce, pipe
+Test 7: #7 reduce, pipe (aspas nao ta ficando na pilha)
 --- Input ---
 function log( msg ) {
   msg asm{println # undefined};
@@ -187,7 +187,7 @@ Maria da Silva
 |{ criaPessoa: { &funcao: ##; }; log: { &funcao: ##; }; p: { nome: Maria; nomeCompleto: { &funcao: ##; }; sobrenome: da Silva; }; undefined: undefined; }|
 === Pilha ===
 
-Test 9: #9 Parâmetros default
+Test 9: #9 Parâmetros default ok 
 --- Input ---
 function log( msg ) {
   msg asm{println # undefined};
@@ -213,7 +213,7 @@ log( mdc( 15, 25 ) );
 |{ log: { &funcao: ##; }; mdc: { &funcao: ##; }; undefined: undefined; }|
 === Pilha ===
 
-Test 10: #10 Parâmetros default - expressões seta
+Test 10: #10 Parâmetros default - expressões seta ok 
 --- Input ---
 function log( msg ) {
   msg asm{println # undefined};
@@ -265,7 +265,7 @@ let d = f( 8.1 )( 7.1 );
 |{ a: 8.1; b: { &funcao: ##; }; c: 72.09; d: 65.691; f: { &funcao: ##; }; undefined: undefined; }|
 === Pilha ===
 
-Test 13: #13 Lambda retornando lambda
+Test 13: #13 Lambda retornando lambda - nao tem aspas
 --- Input ---
 let f = x => y => x*y;
 let b = f(9);
@@ -283,7 +283,7 @@ let d = f( 8.1 )( 7.1 );
 |c|
 "
 
-Test 14: #14 Lambda retornando lambda
+Test 14: #14 Lambda retornando lambda - ok 
 let f = (x,a=y=>9) => (y,b) => y;
 let b = f(9);
 let c = b(7);
@@ -295,7 +295,7 @@ let d = f( 8.1 )( 7.1 );
 |{ b: { &funcao: ##; }; c: 7; d: 7.1; f: { &funcao: ##; }; undefined: undefined; }|
 === Pilha ===
 
-Test 15: #15 Array com expressão lambda e parênteses
+Test 15: #15 Array com expressão lambda e parênteses - ok 
 let a, c;
 let b, d;
 a = [ 2, 3, (b={}).j = 0 ];
@@ -331,4 +331,100 @@ chamou 12
 chamou [ 0: 2; ]
 === Vars ===
 |{ c: [ 0: 1; 1: { a: [ 0: 8; 1: 1; ]; }; ]; d: 9; f: { &funcao: ##; }; k: [ 0: 0; ]; log: { &funcao: ##; }; to_string: { &funcao: ##; }; undefined: undefined; }|
+=== Pilha ===
+
+Test 17: #17 Lambda com captura Simples 
+
+--- Input ---
+let multi = n => x => x*n;
+let dobra = multi( 2 );
+let triplica = multi( 3 );
+let saida = {
+  sete: dobra( 3.5 ),
+  doze: triplica( 4 )
+};
+
+--- Expected output (exact text)---
+=== Console ===
+=== Vars ===
+|{ dobra: { &funcao: ##; captura: { n: 2; }; }; multi: { &funcao: ##; }; saida: { doze: 12; sete: 7; }; triplica: { &funcao: ##; captura: { n: 3; }; }; undefined: undefined; }|
+=== Pilha ===
+
+Test 18: #18 Lambda com captura dentro de loop
+
+--- Input ---
+let log = msg => msg asm{println # undefined};
+let f = [];
+
+{
+  let i;
+
+  for( i = 0; i < 3; i++ )
+    f[i] = () => log(i);
+}
+{
+  for( let j = 0; j < 3; j++ )
+    f[j]();
+}
+
+--- Expected output (exact text)---
+=== Console ===
+0
+1
+2
+=== Vars ===
+|{ f: [ 0: { &funcao: ##; captura: { i: 0; }; }; 1: { &funcao: ##; captura: { i: 1; }; }; 2: { &funcao: ##; captura: { i: 2; }; }; ]; log: { &funcao: ##; }; undefined: undefined; }|
+=== Pilha ===
+
+
+Test 19: #19 Lambda com captura complexa
+
+--- Input ---
+let log = msg => msg asm{println # undefined};
+
+function cria( nome ) {
+  let obj = { print: () => log( nome ) };
+
+  return () => obj;
+}
+
+let a = cria( "Oi" );
+
+cria( "Nada" )().print();
+
+a().print();
+
+--- Expected output (exact text)---
+=== Console ===
+Nada
+Oi
+=== Vars ===
+|{ a: { &funcao: ##; captura: { obj: { print: { &funcao: ##; captura: { nome: Oi; }; }; }; }; }; cria: { &funcao: ##; }; log: { &funcao: ##; }; undefined: undefined; }|
+=== Pilha ===
+
+Test 20: #20 Lambda com captura de objetos
+
+--- Input ---
+let log = msg => msg asm{println # undefined};
+
+function cria( obj ) {
+  return (x) => {
+    obj.nome = x; 
+    obj.i++;
+    return obj; 
+  };
+}
+
+let o = { i: 0 };
+let b = cria( o );
+
+log( b( "Jose" ) );
+log( b( "Manoel" ) );
+
+--- Expected output (exact text)---
+=== Console ===
+{ i: 1; nome: Jose; }
+{ i: 2; nome: Manoel; }
+=== Vars ===
+|{ b: { &funcao: ##; captura: { obj: { i: 2; nome: Manoel; }; }; }; cria: { &funcao: ##; }; log: { &funcao: ##; }; o: { i: 2; nome: Manoel; }; undefined: undefined; }|
 === Pilha ===

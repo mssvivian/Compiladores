@@ -45,6 +45,7 @@ ASM         "asm{"[^}]*"}"
 ","{WS}")"/{WS}"=>" { return token( FECHA_PARENTESES_LAMBDA ); }
 
 "+="       { return token( MAIS_IGUAL ); }
+"-="       { return token( MENOS_IGUAL ); }
 "--"       { return token( MENOS_MENOS ); }
 "++"       { return token( MAIS_MAIS ); }
 
