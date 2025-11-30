@@ -48,7 +48,7 @@ console.log( console.teste );
 |{ console: { log: { &funcao: ##; }; teste: [ 0: aba; 1: cate; ]; }; log: { &funcao: ##; }; undefined: undefined; }|
 === Pilha ===
 
-Test 4: #4 arrays e objetos RESOLVER
+Test 4: #4 arrays e objetos -- falta o " na pilha
 function log( msg ) {
   msg asm{println # undefined};
 }
@@ -166,7 +166,7 @@ log( pipe( invert( b ), 9 ) );
 === Pilha ===
 "
 
-Test 8: #8 Funções em objetos
+Test 8: #8 Funções em objetos ok 
 --- Input ---
 function criaPessoa( nome, sobrenome ) {
   return { nome: nome, sobrenome: sobrenome, nomeCompleto : pessoa => pessoa.nome + ' ' + pessoa.sobrenome };
@@ -251,8 +251,8 @@ Erro: Não é permitido 'return' fora de funções.
 |{ undefined: undefined; }|
 === Pilha ===
 
-Test 12: #12 Lambda retornando lambda
-Incorrect program output
+Test 12: #12 Lambda retornando lambda - ok 
+
 --- Input ---
 let a, f = x => { a = x; return y => a*(y + 1.01); };
 let b = f(9);

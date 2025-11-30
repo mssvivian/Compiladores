@@ -230,7 +230,7 @@ CMD : CMD_LET ';'
     | CMD_WHILE
     | CMD_RET ';'
     | CMD_ASM ';'
-    | ATRIB ';'
+    | ATRIB_NO_OBJ ';'
       { $$.c = $1.c + "^"; } 
     | BLOCO
     | BLOCO_VAZIO
@@ -264,7 +264,7 @@ CMD_RET : RETURN
             
             $$.c =  $$.c + vector<string>{ "'&retorno'", "@", "~" }; /* 3. Instruções de retorno */
           }
-      | RETURN E 
+      | RETURN ATRIB 
           { 
             if(blocos_alinhados_em_funcao.size() == 0) {
               cerr << "Erro: Não é permitido 'return' fora de funções." << endl;
@@ -501,7 +501,7 @@ ATRIB : ATRIB_NO_OBJ
       ;
 
 ATRIB_NO_OBJ
-  : ID '=' ATRIB
+  : ID '=' ATRIB %prec '='
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $3.c + "="; 
       $$.nome_var = $1.c[0]; $$.valor_default = $3.c; $$.eh_atribuicao = true; }
   | ID MAIS_IGUAL ATRIB 
@@ -1057,13 +1057,14 @@ void checa_simbolo( string nome, bool modificavel ) {
     }
   }
 
-  cerr << "Variavel '" << nome << "' não declarada." << endl;
-  exit( 1 );     
+  // cerr << "Variavel '" << nome << "' não declarada." << endl;
+  // exit( 1 );     
 }
 
 void yyerror( const char* st ) {
   cerr << st << endl; 
-   cerr << "Proximo a: " << yytext << endl;
+  cerr << "Linha: " << linha << " Coluna: " << coluna << endl;
+  cerr << "Proximo a: " << yytext << endl;
    exit( 1 );
 }
 
