@@ -276,7 +276,7 @@ END_BLOCO : {desempilha_escopo();}
 
 CMD_RET : RETURN 
           { 
-            if(blocos_alinhados_em_funcao.size() == 0) {
+            if(blocos_alinhados_em_funcao.size() <= 1 ) {
               cerr << "Erro: Não é permitido 'return' fora de funções." << endl;
               exit(1);
             }
@@ -289,7 +289,7 @@ CMD_RET : RETURN
           }
       | RETURN ATRIB 
           { 
-            if(blocos_alinhados_em_funcao.size() == 0) {
+            if(blocos_alinhados_em_funcao.size() <= 1) {
               cerr << "Erro: Não é permitido 'return' fora de funções." << endl;
               exit(1);
             }
