@@ -154,12 +154,32 @@ vector<string> to_inst(string st){
 set<string> detecta_capturas(set<string>& ids_usados, set<string>& parametros, set<string>& locais) {
   set<string> capturas;
   for(const string& id : ids_usados) {
-    // Se não é parâmetro e não é variável local, deve ser capturada
-    if(parametros.find(id) == parametros.end() && locais.find(id) == locais.end()) {
-      capturas.insert(id);
+    // Se é parâmetro ou variável local da própria arrow function, ignora
+    if(parametros.find(id) != parametros.end() || locais.find(id) != locais.end()) {
+        continue;
     }
+
+    // Verifica se é global e não sombreada
+    bool is_global = (ts[0].count(id) > 0);
+    bool is_shadowed = false;
+    
+    // Escopos intermediários: do 1 até o penúltimo (o último é o da arrow function)
+    // ts.size() deve ser pelo menos 2 (Global + Arrow)
+    if (ts.size() > 2) {
+        for(size_t k = 1; k < ts.size() - 1; ++k) {
+            if(ts[k].count(id) > 0) {
+                is_shadowed = true;
+                break;
+            }
+        }
+    }
+
+    if (is_global && !is_shadowed) {
+        continue; // Não captura global pura
+    }
+
+    capturas.insert(id);
   }
-  // cerr << "Capturas: "; for(auto s : capturas) cerr << s << " "; cerr << endl;
   return capturas;
 }
 
@@ -573,7 +593,6 @@ ATRIB_NO_OBJ
            $$.c += "'captura'";
            $$.c += "{}";
            for(const string& cap : capturas) {
-               if(cap == "print" && busca_simbolo("print") == nullptr) continue;
                $$.c += "'" + cap + "'";
                $$.c += cap;
                $$.c += "@";

@@ -224,12 +224,32 @@ vector<string> to_inst(string st){
 set<string> detecta_capturas(set<string>& ids_usados, set<string>& parametros, set<string>& locais) {
   set<string> capturas;
   for(const string& id : ids_usados) {
-    // Se não é parâmetro e não é variável local, deve ser capturada
-    if(parametros.find(id) == parametros.end() && locais.find(id) == locais.end()) {
-      capturas.insert(id);
+    // Se é parâmetro ou variável local da própria arrow function, ignora
+    if(parametros.find(id) != parametros.end() || locais.find(id) != locais.end()) {
+        continue;
     }
+
+    // Verifica se é global e não sombreada
+    bool is_global = (ts[0].count(id) > 0);
+    bool is_shadowed = false;
+    
+    // Escopos intermediários: do 1 até o penúltimo (o último é o da arrow function)
+    // ts.size() deve ser pelo menos 2 (Global + Arrow)
+    if (ts.size() > 2) {
+        for(size_t k = 1; k < ts.size() - 1; ++k) {
+            if(ts[k].count(id) > 0) {
+                is_shadowed = true;
+                break;
+            }
+        }
+    }
+
+    if (is_global && !is_shadowed) {
+        continue; // Não captura global pura
+    }
+
+    capturas.insert(id);
   }
-  // cerr << "Capturas: "; for(auto s : capturas) cerr << s << " "; cerr << endl;
   return capturas;
 }
 
@@ -256,7 +276,7 @@ set<string> extrai_ids_de_codigo(vector<string>& codigo) {
 void empilha_escopo_novo();
 void desempilha_escopo();
 
-#line 260 "y.tab.c"
+#line 280 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -871,21 +891,21 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   216,   216,   217,   220,   221,   225,   226,   227,   228,
-     229,   232,   233,   234,   236,   238,   239,   240,   244,   248,
-     252,   254,   257,   270,   288,   292,   297,   296,   350,   364,
-     374,   375,   378,   380,   383,   384,   385,   386,   389,   398,
-     401,   402,   405,   407,   411,   414,   415,   418,   420,   424,
-     427,   428,   431,   433,   437,   443,   452,   457,   462,   467,
-     474,   479,   482,   487,   494,   501,   502,   506,   509,   511,
-     513,   515,   524,   534,   533,   592,   591,   650,   649,   727,
-     726,   803,   813,   816,   823,   827,   829,   833,   835,   840,
-     841,   844,   846,   855,   856,   859,   861,   864,   866,   870,
-     872,   874,   876,   878,   880,   882,   884,   886,   888,   890,
-     892,   894,   896,   900,   902,   904,   906,   908,   916,   925,
-     936,   945,   950,   952,   953,   954,   955,   957,   958,   960,
-     964,   966,   965,  1019,  1033,  1043,  1049,  1054,  1060,  1066,
-    1071
+       0,   236,   236,   237,   240,   241,   245,   246,   247,   248,
+     249,   252,   253,   254,   256,   258,   259,   260,   264,   268,
+     272,   274,   277,   290,   308,   312,   317,   316,   370,   384,
+     394,   395,   398,   400,   403,   404,   405,   406,   409,   418,
+     421,   422,   425,   427,   431,   434,   435,   438,   440,   444,
+     447,   448,   451,   453,   457,   463,   472,   477,   482,   487,
+     494,   499,   502,   507,   514,   521,   522,   526,   529,   531,
+     533,   535,   544,   554,   553,   612,   611,   670,   669,   747,
+     746,   823,   833,   836,   843,   847,   849,   853,   855,   860,
+     861,   864,   866,   875,   876,   879,   881,   884,   886,   890,
+     892,   894,   896,   898,   900,   902,   904,   906,   908,   910,
+     912,   914,   916,   920,   922,   924,   926,   928,   936,   945,
+     956,   965,   970,   972,   973,   974,   975,   977,   978,   980,
+     984,   986,   985,  1039,  1053,  1063,  1069,  1074,  1080,  1086,
+    1091
 };
 #endif
 
@@ -1691,61 +1711,61 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* S: CMDs  */
-#line 216 "mini_js.y"
+#line 236 "mini_js.y"
          { print( resolve_enderecos( yyvsp[0].c + "." + funcoes ) ); }
-#line 1697 "y.tab.c"
+#line 1717 "y.tab.c"
     break;
 
   case 3: /* S: %empty  */
-#line 217 "mini_js.y"
+#line 237 "mini_js.y"
     { yyval.clear(); }
-#line 1703 "y.tab.c"
+#line 1723 "y.tab.c"
     break;
 
   case 4: /* CMDs: CMDs CMD  */
-#line 220 "mini_js.y"
+#line 240 "mini_js.y"
                  { yyval.c = yyvsp[-1].c + yyvsp[0].c; }
-#line 1709 "y.tab.c"
+#line 1729 "y.tab.c"
     break;
 
   case 14: /* CMD: ATRIB_NO_OBJ ';'  */
-#line 237 "mini_js.y"
+#line 257 "mini_js.y"
       { yyval.c = yyvsp[-1].c + "^"; }
-#line 1715 "y.tab.c"
+#line 1735 "y.tab.c"
     break;
 
   case 17: /* CMD: ';'  */
-#line 241 "mini_js.y"
+#line 261 "mini_js.y"
       { yyval.clear(); }
-#line 1721 "y.tab.c"
+#line 1741 "y.tab.c"
     break;
 
   case 18: /* BLOCO_VAZIO: '{' '}'  */
-#line 245 "mini_js.y"
+#line 265 "mini_js.y"
             { yyval.c = vector<string>{"<{", "}>"}; }
-#line 1727 "y.tab.c"
+#line 1747 "y.tab.c"
     break;
 
   case 19: /* BLOCO: '{' START_BLOCO CMDs '}' END_BLOCO  */
-#line 249 "mini_js.y"
+#line 269 "mini_js.y"
         { yyval.c = "<{" + yyvsp[-2].c + "}>" ; }
-#line 1733 "y.tab.c"
+#line 1753 "y.tab.c"
     break;
 
   case 20: /* START_BLOCO: %empty  */
-#line 252 "mini_js.y"
+#line 272 "mini_js.y"
               {empilha_escopo_novo();}
-#line 1739 "y.tab.c"
+#line 1759 "y.tab.c"
     break;
 
   case 21: /* END_BLOCO: %empty  */
-#line 254 "mini_js.y"
+#line 274 "mini_js.y"
             {desempilha_escopo();}
-#line 1745 "y.tab.c"
+#line 1765 "y.tab.c"
     break;
 
   case 22: /* CMD_RET: RETURN  */
-#line 258 "mini_js.y"
+#line 278 "mini_js.y"
           { 
             if(blocos_alinhados_em_funcao.size() == 0) {
               cerr << "Erro: Não é permitido 'return' fora de funções." << endl;
@@ -1758,11 +1778,11 @@ yyreduce:
             
             yyval.c =  yyval.c + vector<string>{ "'&retorno'", "@", "~" }; /* 3. Instruções de retorno */
           }
-#line 1762 "y.tab.c"
+#line 1782 "y.tab.c"
     break;
 
   case 23: /* CMD_RET: RETURN ATRIB  */
-#line 271 "mini_js.y"
+#line 291 "mini_js.y"
           { 
             if(blocos_alinhados_em_funcao.size() == 0) {
               cerr << "Erro: Não é permitido 'return' fora de funções." << endl;
@@ -1776,25 +1796,25 @@ yyreduce:
             /* 3. Instruções de retorno (NÃO adicione $2.c de novo) */
             yyval.c = yyval.c + vector<string>{ "'&retorno'", "@", "~" }; 
           }
-#line 1780 "y.tab.c"
+#line 1800 "y.tab.c"
     break;
 
   case 24: /* EMPILHA_TS_FUNC: %empty  */
-#line 288 "mini_js.y"
+#line 308 "mini_js.y"
                   { ts.push_back( map< string, Simbolo >{} ); 
                 blocos_alinhados_em_funcao.push_back(0);}
-#line 1787 "y.tab.c"
+#line 1807 "y.tab.c"
     break;
 
   case 25: /* DESEMPILHA_TS_FUNC: %empty  */
-#line 292 "mini_js.y"
+#line 312 "mini_js.y"
                      { ts.pop_back(); 
                       blocos_alinhados_em_funcao.pop_back();}
-#line 1794 "y.tab.c"
+#line 1814 "y.tab.c"
     break;
 
   case 26: /* @1: %empty  */
-#line 297 "mini_js.y"
+#line 317 "mini_js.y"
            {
               // Mid-rule action: Declare parameters
               vector<string> codigo_params;
@@ -1833,11 +1853,11 @@ yyreduce:
               }
               yyval.c = codigo_params; // Pass generated code to next part
            }
-#line 1837 "y.tab.c"
+#line 1857 "y.tab.c"
     break;
 
   case 27: /* CMD_FUNC: FUNCTION NOME_FUNCAO '(' EMPILHA_TS_FUNC LISTA_PARAMS_OPT ')' @1 '{' CMDs '}' DESEMPILHA_TS_FUNC  */
-#line 336 "mini_js.y"
+#line 356 "mini_js.y"
            { 
              string definicao_lbl_endereco_funcao = ":" + yyvsp[-9].endereco_funcao;
              
@@ -1850,11 +1870,11 @@ yyreduce:
                          "undefined" + "@" + "'&retorno'" + "@"+ "~";
              
            }
-#line 1854 "y.tab.c"
+#line 1874 "y.tab.c"
     break;
 
   case 28: /* NOME_FUNCAO: ID  */
-#line 351 "mini_js.y"
+#line 371 "mini_js.y"
             { 
               string endereco_funcao = gera_label( "func_" + yyvsp[0].c[0] );
               yyval.endereco_funcao = endereco_funcao; /* 1. Salva o label para CMD_FUNC usar */
@@ -1866,11 +1886,11 @@ yyreduce:
                      yyvsp[0].c + "{}" + "="  + "'&funcao'" + endereco_funcao +  /* 'foo '&funcao' func_foo_1' ... */
                      "[=]" + "^";                              /* ... '[=] ^' (atribui prop) */
             }
-#line 1870 "y.tab.c"
+#line 1890 "y.tab.c"
     break;
 
   case 29: /* CMD_FOR: FOR '(' SF ';' ECOND_OPT ';' EF ')' CMD  */
-#line 365 "mini_js.y"
+#line 385 "mini_js.y"
         { string teste_for = gera_label( "teste_for" );
           string fim_for = gera_label( "fim_for" );
           
@@ -1878,234 +1898,234 @@ yyreduce:
                  yyvsp[-4].c + "!" + fim_for + "?" + yyvsp[0].c + 
                  yyvsp[-2].c + teste_for + "#" + define_label(fim_for);
         }
-#line 1882 "y.tab.c"
+#line 1902 "y.tab.c"
     break;
 
   case 31: /* ECOND_OPT: %empty  */
-#line 375 "mini_js.y"
+#line 395 "mini_js.y"
             { yyval.c = vector<string>{"1"}; }
-#line 1888 "y.tab.c"
+#line 1908 "y.tab.c"
     break;
 
   case 32: /* EF: ATRIB  */
-#line 379 "mini_js.y"
+#line 399 "mini_js.y"
       { yyval.c = yyvsp[0].c + "^"; }
-#line 1894 "y.tab.c"
+#line 1914 "y.tab.c"
     break;
 
   case 33: /* EF: %empty  */
-#line 380 "mini_js.y"
+#line 400 "mini_js.y"
       { yyval.clear(); }
-#line 1900 "y.tab.c"
+#line 1920 "y.tab.c"
     break;
 
   case 38: /* CMD_WHILE: WHILE '(' E ')' CMD  */
-#line 390 "mini_js.y"
+#line 410 "mini_js.y"
         { string inicio_while = gera_label( "inicio_while" );
           string fim_while = gera_label( "fim_while" );
           yyval.c = define_label(inicio_while) + 
                  yyvsp[-2].c + "!" + fim_while + "?" + yyvsp[0].c + 
                  inicio_while + "#" + define_label(fim_while);
         }
-#line 1911 "y.tab.c"
+#line 1931 "y.tab.c"
     break;
 
   case 39: /* CMD_LET: LET LET_VARs  */
-#line 398 "mini_js.y"
+#line 418 "mini_js.y"
                        { yyval.c = yyvsp[0].c; }
-#line 1917 "y.tab.c"
+#line 1937 "y.tab.c"
     break;
 
   case 40: /* LET_VARs: LET_VAR ',' LET_VARs  */
-#line 401 "mini_js.y"
+#line 421 "mini_js.y"
                                 { yyval.c = yyvsp[-2].c + yyvsp[0].c; }
-#line 1923 "y.tab.c"
+#line 1943 "y.tab.c"
     break;
 
   case 42: /* LET_VAR: ID  */
-#line 406 "mini_js.y"
+#line 426 "mini_js.y"
           { yyval.c = declara_var( Let, yyvsp[0] ).c; }
-#line 1929 "y.tab.c"
+#line 1949 "y.tab.c"
     break;
 
   case 43: /* LET_VAR: ID '=' EOBJ  */
-#line 408 "mini_js.y"
+#line 428 "mini_js.y"
           { yyval.c = declara_var( Let, yyvsp[-2] ).c + yyvsp[-2].c[0] + yyvsp[0].c + "=" + "^"; }
-#line 1935 "y.tab.c"
+#line 1955 "y.tab.c"
     break;
 
   case 44: /* CMD_VAR: VAR VAR_VARs  */
-#line 411 "mini_js.y"
+#line 431 "mini_js.y"
                        { yyval.c = yyvsp[0].c; }
-#line 1941 "y.tab.c"
+#line 1961 "y.tab.c"
     break;
 
   case 45: /* VAR_VARs: VAR_VAR ',' VAR_VARs  */
-#line 414 "mini_js.y"
+#line 434 "mini_js.y"
                                 { yyval.c = yyvsp[-2].c + yyvsp[0].c; }
-#line 1947 "y.tab.c"
+#line 1967 "y.tab.c"
     break;
 
   case 47: /* VAR_VAR: ID  */
-#line 419 "mini_js.y"
+#line 439 "mini_js.y"
           { yyval.c = declara_var( Var, yyvsp[0] ).c; }
-#line 1953 "y.tab.c"
+#line 1973 "y.tab.c"
     break;
 
   case 48: /* VAR_VAR: ID '=' E  */
-#line 421 "mini_js.y"
+#line 441 "mini_js.y"
           {  yyval.c = declara_var( Var, yyvsp[-2] ).c + yyvsp[-2].c[0] + yyvsp[0].c + "=" + "^"; }
-#line 1959 "y.tab.c"
+#line 1979 "y.tab.c"
     break;
 
   case 49: /* CMD_CONST: CONST CONST_VARs  */
-#line 424 "mini_js.y"
+#line 444 "mini_js.y"
                             { yyval.c = yyvsp[0].c; }
-#line 1965 "y.tab.c"
+#line 1985 "y.tab.c"
     break;
 
   case 50: /* CONST_VARs: CONST_VAR ',' CONST_VARs  */
-#line 427 "mini_js.y"
+#line 447 "mini_js.y"
                                       { yyval.c = yyvsp[-2].c + yyvsp[0].c; }
-#line 1971 "y.tab.c"
+#line 1991 "y.tab.c"
     break;
 
   case 52: /* CONST_VAR: ID  */
-#line 432 "mini_js.y"
+#line 452 "mini_js.y"
             { yyval.c = declara_var( Const, yyvsp[0] ).c; }
-#line 1977 "y.tab.c"
+#line 1997 "y.tab.c"
     break;
 
   case 53: /* CONST_VAR: ID '=' E  */
-#line 434 "mini_js.y"
+#line 454 "mini_js.y"
             { yyval.c = declara_var( Const, yyvsp[-2] ).c + yyvsp[-2].c[0] + yyvsp[0].c + "=" + "^"; }
-#line 1983 "y.tab.c"
+#line 2003 "y.tab.c"
     break;
 
   case 54: /* CMD_IF: IF '(' E ')' CMD  */
-#line 438 "mini_js.y"
+#line 458 "mini_js.y"
           {
             string fim_if = gera_label( "fim_if" );
             yyval.c = yyvsp[-2].c + "!" + fim_if + "?" + yyvsp[0].c + define_label(fim_if);
           }
-#line 1992 "y.tab.c"
+#line 2012 "y.tab.c"
     break;
 
   case 55: /* CMD_IF: IF '(' E ')' CMD ELSE CMD  */
-#line 444 "mini_js.y"
+#line 464 "mini_js.y"
           {  string fim_if = gera_label( "fim_if" );
             string else_if = gera_label( "else_if" );
             yyval.c = yyvsp[-4].c + "!" + else_if + "?" + yyvsp[-2].c + fim_if + 
             "#" + define_label(else_if) + yyvsp[0].c +  define_label(fim_if);
           }
-#line 2002 "y.tab.c"
+#line 2022 "y.tab.c"
     break;
 
   case 56: /* LVALUEPROP: LVALUEPROP '[' EOBJ ']'  */
-#line 453 "mini_js.y"
+#line 473 "mini_js.y"
             { yyval.c.clear(); 
               yyval.esq = yyvsp[-3].esq + yyvsp[-3].dir + "[@]";
               yyval.dir = yyvsp[-1].c;
                }
-#line 2011 "y.tab.c"
+#line 2031 "y.tab.c"
     break;
 
   case 57: /* LVALUEPROP: LVALUEPROP '.' ID  */
-#line 458 "mini_js.y"
+#line 478 "mini_js.y"
             { yyval.c.clear(); 
               yyval.esq = yyvsp[-2].esq + yyvsp[-2].dir + "[@]";
               yyval.dir = vector<string>{"'" + yyvsp[0].c[0] + "'"};
                }
-#line 2020 "y.tab.c"
+#line 2040 "y.tab.c"
     break;
 
   case 58: /* LVALUEPROP: F '[' EOBJ ']'  */
-#line 463 "mini_js.y"
+#line 483 "mini_js.y"
              { yyval.c.clear(); 
               yyval.esq = yyvsp[-3].c;
               yyval.dir = yyvsp[-1].c;
                }
-#line 2029 "y.tab.c"
+#line 2049 "y.tab.c"
     break;
 
   case 59: /* LVALUEPROP: F '.' ID  */
-#line 468 "mini_js.y"
+#line 488 "mini_js.y"
             { yyval.c.clear(); 
               yyval.esq = yyvsp[-2].c;
               yyval.dir = vector<string>{"'" + yyvsp[0].c[0] + "'"};
               }
-#line 2038 "y.tab.c"
+#line 2058 "y.tab.c"
     break;
 
   case 60: /* LIST: '[' LISTVALS ']'  */
-#line 475 "mini_js.y"
+#line 495 "mini_js.y"
         { 
           yyval.c = vector<string>{"[]"};
           yyval.c += yyvsp[-1].c;
         }
-#line 2047 "y.tab.c"
+#line 2067 "y.tab.c"
     break;
 
   case 61: /* LIST: '[' ']'  */
-#line 479 "mini_js.y"
+#line 499 "mini_js.y"
                 { yyval.c = vector<string>{"[]"}; }
-#line 2053 "y.tab.c"
+#line 2073 "y.tab.c"
     break;
 
   case 62: /* LISTVALS: LISTVALS ',' LISTVAL  */
-#line 483 "mini_js.y"
+#line 503 "mini_js.y"
          { 
            yyval.c = yyvsp[-2].c + to_string(yyvsp[-2].n_args) + yyvsp[0].c + "[<=]"; 
            yyval.n_args = yyvsp[-2].n_args + 1;
          }
-#line 2062 "y.tab.c"
+#line 2082 "y.tab.c"
     break;
 
   case 63: /* LISTVALS: LISTVAL  */
-#line 488 "mini_js.y"
+#line 508 "mini_js.y"
          {
            yyval.c = vector<string>{"0"} + yyvsp[0].c + "[<=]";
            yyval.n_args = 1;
          }
-#line 2071 "y.tab.c"
+#line 2091 "y.tab.c"
     break;
 
   case 64: /* LISTVAL: EOBJ  */
-#line 495 "mini_js.y"
+#line 515 "mini_js.y"
         { 
           yyval.c = yyvsp[0].c;
           yyval.n_args = 0; 
         }
-#line 2080 "y.tab.c"
+#line 2100 "y.tab.c"
     break;
 
   case 67: /* ATRIB_NO_OBJ: ID '=' ATRIB  */
-#line 507 "mini_js.y"
+#line 527 "mini_js.y"
     { checa_simbolo( yyvsp[-2].c[0], true ); yyval.c = yyvsp[-2].c + yyvsp[0].c + "="; 
       yyval.nome_var = yyvsp[-2].c[0]; yyval.valor_default = yyvsp[0].c; yyval.eh_atribuicao = true; }
-#line 2087 "y.tab.c"
+#line 2107 "y.tab.c"
     break;
 
   case 68: /* ATRIB_NO_OBJ: ID MAIS_IGUAL ATRIB  */
-#line 510 "mini_js.y"
+#line 530 "mini_js.y"
     { checa_simbolo( yyvsp[-2].c[0], true ); yyval.c = yyvsp[-2].c + yyvsp[-2].c + "@" + yyvsp[0].c + "+" + "="; yyval.eh_atribuicao = true; yyval.nome_var = yyvsp[-2].c[0]; }
-#line 2093 "y.tab.c"
+#line 2113 "y.tab.c"
     break;
 
   case 69: /* ATRIB_NO_OBJ: ID MENOS_IGUAL ATRIB  */
-#line 512 "mini_js.y"
+#line 532 "mini_js.y"
     { checa_simbolo( yyvsp[-2].c[0], true ); yyval.c = yyvsp[-2].c + yyvsp[-2].c + "@" + yyvsp[0].c + "-" + "="; yyval.eh_atribuicao = true; yyval.nome_var = yyvsp[-2].c[0]; }
-#line 2099 "y.tab.c"
+#line 2119 "y.tab.c"
     break;
 
   case 70: /* ATRIB_NO_OBJ: LVALUEPROP '=' ATRIB  */
-#line 514 "mini_js.y"
+#line 534 "mini_js.y"
     { yyval.c = yyvsp[-2].esq + yyvsp[-2].dir + yyvsp[0].c + "[=]"; }
-#line 2105 "y.tab.c"
+#line 2125 "y.tab.c"
     break;
 
   case 71: /* ATRIB_NO_OBJ: LVALUEPROP MAIS_IGUAL ATRIB  */
-#line 516 "mini_js.y"
+#line 536 "mini_js.y"
     { yyval.c = yyvsp[-2].c + yyvsp[-2].c + "[@]" + yyvsp[0].c + "+" + "[=]"; 
           string esq = gera_temp("esq");
           string dir = gera_temp("dir");
@@ -2114,11 +2134,11 @@ yyreduce:
                   esq + "@" + dir + "@" +
                   esq + "@" + dir + "@" + "[@]" +
                   yyvsp[0].c + "+" + "[=]" ;}
-#line 2118 "y.tab.c"
+#line 2138 "y.tab.c"
     break;
 
   case 72: /* ATRIB_NO_OBJ: LVALUEPROP MENOS_IGUAL ATRIB  */
-#line 525 "mini_js.y"
+#line 545 "mini_js.y"
     { yyval.c = yyvsp[-2].c + yyvsp[-2].c + "[@]" + yyvsp[0].c + "+" + "[=]"; 
           string esq = gera_temp("esq");
           string dir = gera_temp("dir");
@@ -2127,11 +2147,11 @@ yyreduce:
                   esq + "@" + dir + "@" +
                   esq + "@" + dir + "@" + "[@]" +
                   yyvsp[0].c + "-" + "[=]" ;}
-#line 2131 "y.tab.c"
+#line 2151 "y.tab.c"
     break;
 
   case 73: /* @2: %empty  */
-#line 534 "mini_js.y"
+#line 554 "mini_js.y"
     {
       ts.push_back( map< string, Simbolo >{} ); 
       blocos_alinhados_em_funcao.push_back(0);
@@ -2154,11 +2174,11 @@ yyreduce:
       yyval.c = codigo_params;
       yyval.endereco_funcao = endereco_funcao;
     }
-#line 2158 "y.tab.c"
+#line 2178 "y.tab.c"
     break;
 
   case 74: /* ATRIB_NO_OBJ: ID SETA @2 BLOCO  */
-#line 557 "mini_js.y"
+#line 577 "mini_js.y"
     {
       string endereco_funcao = yyvsp[-1].endereco_funcao;
       vector<string> codigo_params = yyvsp[-1].c;
@@ -2193,11 +2213,11 @@ yyreduce:
       ts.pop_back(); 
       blocos_alinhados_em_funcao.pop_back();
     }
-#line 2197 "y.tab.c"
+#line 2217 "y.tab.c"
     break;
 
   case 75: /* @3: %empty  */
-#line 592 "mini_js.y"
+#line 612 "mini_js.y"
     {
       ts.push_back( map< string, Simbolo >{} ); 
       blocos_alinhados_em_funcao.push_back(0);
@@ -2220,11 +2240,11 @@ yyreduce:
       yyval.c = codigo_params;
       yyval.endereco_funcao = endereco_funcao;
     }
-#line 2224 "y.tab.c"
+#line 2244 "y.tab.c"
     break;
 
   case 76: /* ATRIB_NO_OBJ: ID SETA @3 ATRIB_NO_OBJ  */
-#line 615 "mini_js.y"
+#line 635 "mini_js.y"
     {
       string endereco_funcao = yyvsp[-1].endereco_funcao;
       vector<string> codigo_params = yyvsp[-1].c;
@@ -2259,11 +2279,11 @@ yyreduce:
       ts.pop_back(); 
       blocos_alinhados_em_funcao.pop_back();
     }
-#line 2263 "y.tab.c"
+#line 2283 "y.tab.c"
     break;
 
   case 77: /* @4: %empty  */
-#line 650 "mini_js.y"
+#line 670 "mini_js.y"
     {
       string endereco_funcao = gera_label( "func_arrow" );
       ts.push_back( map< string, Simbolo >{} ); 
@@ -2306,11 +2326,11 @@ yyreduce:
       yyval.c = codigo_params;
       yyval.endereco_funcao = endereco_funcao;
     }
-#line 2310 "y.tab.c"
+#line 2330 "y.tab.c"
     break;
 
   case 78: /* ATRIB_NO_OBJ: '(' LISTA_PARAMS_OPT FECHA_PARENTESES_LAMBDA SETA @4 ATRIB_NO_OBJ  */
-#line 693 "mini_js.y"
+#line 713 "mini_js.y"
     {
        string endereco_funcao = yyvsp[-1].endereco_funcao;
        vector<string> codigo_params = yyvsp[-1].c;
@@ -2344,11 +2364,11 @@ yyreduce:
        ts.pop_back(); 
        blocos_alinhados_em_funcao.pop_back();
     }
-#line 2348 "y.tab.c"
+#line 2368 "y.tab.c"
     break;
 
   case 79: /* @5: %empty  */
-#line 727 "mini_js.y"
+#line 747 "mini_js.y"
     {
       string endereco_funcao = gera_label( "func_arrow" );
       ts.push_back( map< string, Simbolo >{} ); 
@@ -2391,11 +2411,11 @@ yyreduce:
       yyval.c = codigo_params;
       yyval.endereco_funcao = endereco_funcao;
     }
-#line 2395 "y.tab.c"
+#line 2415 "y.tab.c"
     break;
 
   case 80: /* ATRIB_NO_OBJ: '(' LISTA_PARAMS_OPT FECHA_PARENTESES_LAMBDA SETA @5 BLOCO  */
-#line 770 "mini_js.y"
+#line 790 "mini_js.y"
     {
        string endereco_funcao = yyvsp[-1].endereco_funcao;
        vector<string> codigo_params = yyvsp[-1].c;
@@ -2429,204 +2449,204 @@ yyreduce:
        ts.pop_back(); 
        blocos_alinhados_em_funcao.pop_back();
     }
-#line 2433 "y.tab.c"
+#line 2453 "y.tab.c"
     break;
 
   case 81: /* ATRIB_NO_OBJ: E  */
-#line 804 "mini_js.y"
+#line 824 "mini_js.y"
     { yyval.c = yyvsp[0].c; yyval.nome_var = yyvsp[0].nome_var; }
-#line 2439 "y.tab.c"
+#line 2459 "y.tab.c"
     break;
 
   case 83: /* OBJ_LITERAL: '{' CAMPOS '}'  */
-#line 817 "mini_js.y"
+#line 837 "mini_js.y"
     { 
       yyval.c = vector<string>{"{}"};
       if(yyvsp[-1].c.size() > 0) {
         yyval.c += yyvsp[-1].c;
       }
     }
-#line 2450 "y.tab.c"
+#line 2470 "y.tab.c"
     break;
 
   case 84: /* OBJ_LITERAL: '{' '}'  */
-#line 824 "mini_js.y"
+#line 844 "mini_js.y"
     { yyval.c = vector<string>{"{}"}; }
-#line 2456 "y.tab.c"
+#line 2476 "y.tab.c"
     break;
 
   case 85: /* PARAM: ID  */
-#line 828 "mini_js.y"
+#line 848 "mini_js.y"
       { yyval.nome_var = yyvsp[0].c[0]; yyval.c = yyvsp[0].c; }
-#line 2462 "y.tab.c"
+#line 2482 "y.tab.c"
     break;
 
   case 86: /* PARAM: ID '=' EOBJ  */
-#line 830 "mini_js.y"
+#line 850 "mini_js.y"
       { yyval.nome_var = yyvsp[-2].c[0]; yyval.valor_default = yyvsp[0].c; yyval.c = yyvsp[-2].c; }
-#line 2468 "y.tab.c"
+#line 2488 "y.tab.c"
     break;
 
   case 87: /* LISTA_PARAMS: PARAM  */
-#line 834 "mini_js.y"
+#line 854 "mini_js.y"
              { yyval.lista_exprs = {yyvsp[0]}; }
-#line 2474 "y.tab.c"
+#line 2494 "y.tab.c"
     break;
 
   case 88: /* LISTA_PARAMS: PARAM ',' LISTA_PARAMS  */
-#line 836 "mini_js.y"
+#line 856 "mini_js.y"
              { yyval.lista_exprs = {yyvsp[-2]}; 
                yyval.lista_exprs.insert(yyval.lista_exprs.end(), yyvsp[0].lista_exprs.begin(), yyvsp[0].lista_exprs.end()); }
-#line 2481 "y.tab.c"
+#line 2501 "y.tab.c"
     break;
 
   case 90: /* LISTA_PARAMS_OPT: %empty  */
-#line 841 "mini_js.y"
+#line 861 "mini_js.y"
                    { yyval.clear(); }
-#line 2487 "y.tab.c"
+#line 2507 "y.tab.c"
     break;
 
   case 91: /* LISTA_MISTA: ATRIB  */
-#line 845 "mini_js.y"
+#line 865 "mini_js.y"
             { yyval.lista_exprs = {yyvsp[0]}; }
-#line 2493 "y.tab.c"
+#line 2513 "y.tab.c"
     break;
 
   case 92: /* LISTA_MISTA: ATRIB ',' LISTA_MISTA  */
-#line 847 "mini_js.y"
+#line 867 "mini_js.y"
             { yyval.lista_exprs = {yyvsp[-2]}; 
               yyval.lista_exprs.insert(yyval.lista_exprs.end(), yyvsp[0].lista_exprs.begin(), yyvsp[0].lista_exprs.end()); }
-#line 2500 "y.tab.c"
+#line 2520 "y.tab.c"
     break;
 
   case 95: /* CAMPOS: CAMPO ',' CAMPOS  */
-#line 860 "mini_js.y"
+#line 880 "mini_js.y"
        { yyval.c = yyvsp[-2].c + yyvsp[0].c; }
-#line 2506 "y.tab.c"
+#line 2526 "y.tab.c"
     break;
 
   case 97: /* CAMPO: ID ':' EOBJ  */
-#line 865 "mini_js.y"
+#line 885 "mini_js.y"
       { yyval.c = "'" + yyvsp[-2].c[0] + "'" + yyvsp[0].c + "[<=]"; }
-#line 2512 "y.tab.c"
+#line 2532 "y.tab.c"
     break;
 
   case 98: /* CAMPO: ID  */
-#line 867 "mini_js.y"
+#line 887 "mini_js.y"
       { yyval.c = "'" + yyvsp[0].c[0] + "'" + yyvsp[0].c + "@" + "[<=]"; }
-#line 2518 "y.tab.c"
+#line 2538 "y.tab.c"
     break;
 
   case 99: /* E: LVALUEPROP  */
-#line 871 "mini_js.y"
+#line 891 "mini_js.y"
     { yyval.c = yyvsp[0].esq + yyvsp[0].dir + "[@]"; }
-#line 2524 "y.tab.c"
+#line 2544 "y.tab.c"
     break;
 
   case 100: /* E: E IGUAL E  */
-#line 873 "mini_js.y"
+#line 893 "mini_js.y"
     { yyval.c = yyvsp[-2].c + yyvsp[0].c + yyvsp[-1].c;}
-#line 2530 "y.tab.c"
+#line 2550 "y.tab.c"
     break;
 
   case 101: /* E: E DIF E  */
-#line 875 "mini_js.y"
+#line 895 "mini_js.y"
     { yyval.c = yyvsp[-2].c + yyvsp[0].c + yyvsp[-1].c;}
-#line 2536 "y.tab.c"
+#line 2556 "y.tab.c"
     break;
 
   case 102: /* E: E ME_IG E  */
-#line 877 "mini_js.y"
+#line 897 "mini_js.y"
     { yyval.c = yyvsp[-2].c + yyvsp[0].c + yyvsp[-1].c;}
-#line 2542 "y.tab.c"
+#line 2562 "y.tab.c"
     break;
 
   case 103: /* E: E MA_IG E  */
-#line 879 "mini_js.y"
+#line 899 "mini_js.y"
     { yyval.c = yyvsp[-2].c + yyvsp[0].c + yyvsp[-1].c;}
-#line 2548 "y.tab.c"
+#line 2568 "y.tab.c"
     break;
 
   case 104: /* E: E '<' E  */
-#line 881 "mini_js.y"
+#line 901 "mini_js.y"
     { yyval.c = yyvsp[-2].c + yyvsp[0].c + yyvsp[-1].c; }
-#line 2554 "y.tab.c"
+#line 2574 "y.tab.c"
     break;
 
   case 105: /* E: E '>' E  */
-#line 883 "mini_js.y"
+#line 903 "mini_js.y"
     { yyval.c = yyvsp[-2].c + yyvsp[0].c + yyvsp[-1].c; }
-#line 2560 "y.tab.c"
+#line 2580 "y.tab.c"
     break;
 
   case 106: /* E: E '+' E  */
-#line 885 "mini_js.y"
+#line 905 "mini_js.y"
     { yyval.c = yyvsp[-2].c + yyvsp[0].c + yyvsp[-1].c; }
-#line 2566 "y.tab.c"
+#line 2586 "y.tab.c"
     break;
 
   case 107: /* E: E '-' E  */
-#line 887 "mini_js.y"
+#line 907 "mini_js.y"
     { yyval.c = yyvsp[-2].c + yyvsp[0].c + yyvsp[-1].c; }
-#line 2572 "y.tab.c"
+#line 2592 "y.tab.c"
     break;
 
   case 108: /* E: E '*' E  */
-#line 889 "mini_js.y"
+#line 909 "mini_js.y"
     { yyval.c = yyvsp[-2].c + yyvsp[0].c + yyvsp[-1].c; }
-#line 2578 "y.tab.c"
+#line 2598 "y.tab.c"
     break;
 
   case 109: /* E: E '/' E  */
-#line 891 "mini_js.y"
+#line 911 "mini_js.y"
     { yyval.c = yyvsp[-2].c + yyvsp[0].c + yyvsp[-1].c; }
-#line 2584 "y.tab.c"
+#line 2604 "y.tab.c"
     break;
 
   case 110: /* E: E '%' E  */
-#line 893 "mini_js.y"
+#line 913 "mini_js.y"
     { yyval.c = yyvsp[-2].c + yyvsp[0].c + yyvsp[-1].c; }
-#line 2590 "y.tab.c"
+#line 2610 "y.tab.c"
     break;
 
   case 111: /* E: UN  */
-#line 895 "mini_js.y"
+#line 915 "mini_js.y"
     { yyval.c = yyvsp[0].c; yyval.nome_var = yyvsp[0].nome_var; }
-#line 2596 "y.tab.c"
+#line 2616 "y.tab.c"
     break;
 
   case 112: /* E: E ASM  */
-#line 897 "mini_js.y"
+#line 917 "mini_js.y"
     { yyval.c = yyvsp[-1].c + yyvsp[0].c; }
-#line 2602 "y.tab.c"
+#line 2622 "y.tab.c"
     break;
 
   case 113: /* UN: MAIS_MAIS ID  */
-#line 901 "mini_js.y"
+#line 921 "mini_js.y"
         {yyval.c = yyvsp[0].c + yyvsp[0].c + "@" + "1" + "+" + "=";}
-#line 2608 "y.tab.c"
+#line 2628 "y.tab.c"
     break;
 
   case 114: /* UN: MENOS_MENOS ID  */
-#line 903 "mini_js.y"
+#line 923 "mini_js.y"
         {yyval.c = yyvsp[0].c + yyvsp[0].c + "@" + "1" + "-" + "=";}
-#line 2614 "y.tab.c"
+#line 2634 "y.tab.c"
     break;
 
   case 115: /* UN: ID MAIS_MAIS  */
-#line 905 "mini_js.y"
+#line 925 "mini_js.y"
         {yyval.c = yyvsp[-1].c + "@" + yyvsp[-1].c + yyvsp[-1].c + "@" + "1" + "+" + "=" + "^";}
-#line 2620 "y.tab.c"
+#line 2640 "y.tab.c"
     break;
 
   case 116: /* UN: ID MENOS_MENOS  */
-#line 907 "mini_js.y"
+#line 927 "mini_js.y"
         {yyval.c = yyvsp[-1].c + "@" + yyvsp[-1].c + yyvsp[-1].c + "@" + "1" + "-" + "=" + "^";}
-#line 2626 "y.tab.c"
+#line 2646 "y.tab.c"
     break;
 
   case 117: /* UN: MAIS_MAIS LVALUEPROP  */
-#line 909 "mini_js.y"
+#line 929 "mini_js.y"
         { string esq = gera_temp("esq");
           string dir = gera_temp("dir");
           yyval.c =  to_inst(esq) + "&" + esq + yyvsp[0].esq + "=" + "^" +
@@ -2634,11 +2654,11 @@ yyreduce:
                   esq + "@" + dir + "@" +
                   esq + "@" + dir + "@" + "[@]" +
                   "1" + "+" + "[=]" ;}
-#line 2638 "y.tab.c"
+#line 2658 "y.tab.c"
     break;
 
   case 118: /* UN: MENOS_MENOS LVALUEPROP  */
-#line 917 "mini_js.y"
+#line 937 "mini_js.y"
         {
           string esq = gera_temp("esq");
           string dir = gera_temp("dir");
@@ -2647,11 +2667,11 @@ yyreduce:
                   esq + "@" + dir + "@" +
                   esq + "@" + dir + "@" + "[@]" +
                   "1" + "-" + "[=]" ;}
-#line 2651 "y.tab.c"
+#line 2671 "y.tab.c"
     break;
 
   case 119: /* UN: LVALUEPROP MAIS_MAIS  */
-#line 926 "mini_js.y"
+#line 946 "mini_js.y"
         {
          string esq = gera_temp("esq");
          string dir = gera_temp("dir");
@@ -2662,11 +2682,11 @@ yyreduce:
                 esq + "@" + dir + "@" + "[@]" +
                 "1" + "+" + "[=]" + "^";
         }
-#line 2666 "y.tab.c"
+#line 2686 "y.tab.c"
     break;
 
   case 120: /* UN: LVALUEPROP MENOS_MENOS  */
-#line 937 "mini_js.y"
+#line 957 "mini_js.y"
         {string esq = gera_temp("esq");
          string dir = gera_temp("dir");
          yyval.c = to_inst(esq) + "&" + esq + yyvsp[-1].esq + "=" + "^" +
@@ -2675,29 +2695,29 @@ yyreduce:
                 esq + "@" + dir + "@" +
                 esq + "@" + dir + "@" + "[@]" +
                 "1" + "-" + "[=]" + "^";}
-#line 2679 "y.tab.c"
+#line 2699 "y.tab.c"
     break;
 
   case 122: /* F: ID  */
-#line 951 "mini_js.y"
+#line 971 "mini_js.y"
     { yyval.c = yyvsp[0].c + "@"; yyval.nome_var = yyvsp[0].c[0]; }
-#line 2685 "y.tab.c"
+#line 2705 "y.tab.c"
     break;
 
   case 128: /* F: '-' F  */
-#line 959 "mini_js.y"
+#line 979 "mini_js.y"
       { yyval.c = "0" + yyvsp[0].c + "-" ; }
-#line 2691 "y.tab.c"
+#line 2711 "y.tab.c"
     break;
 
   case 129: /* F: '+' F  */
-#line 961 "mini_js.y"
+#line 981 "mini_js.y"
       { yyval.c = "0" + yyvsp[0].c + "+" ; }
-#line 2697 "y.tab.c"
+#line 2717 "y.tab.c"
     break;
 
   case 131: /* @6: %empty  */
-#line 966 "mini_js.y"
+#line 986 "mini_js.y"
       {
          string endereco_funcao = gera_label( "func_anon" );
          ts.push_back( map< string, Simbolo >{} ); 
@@ -2740,11 +2760,11 @@ yyreduce:
          yyval.c = codigo_params;
          yyval.endereco_funcao = endereco_funcao;
       }
-#line 2744 "y.tab.c"
+#line 2764 "y.tab.c"
     break;
 
   case 132: /* F: FUNCTION '(' LISTA_PARAMS_OPT ')' @6 '{' CMDs '}'  */
-#line 1009 "mini_js.y"
+#line 1029 "mini_js.y"
       {
          string endereco_funcao = yyvsp[-3].endereco_funcao;
          vector<string> codigo_params = yyvsp[-3].c;
@@ -2755,11 +2775,11 @@ yyreduce:
          ts.pop_back(); 
          blocos_alinhados_em_funcao.pop_back();
       }
-#line 2759 "y.tab.c"
+#line 2779 "y.tab.c"
     break;
 
   case 133: /* F: '(' LISTA_MISTA ')'  */
-#line 1020 "mini_js.y"
+#line 1040 "mini_js.y"
       { 
          yyval.c.clear();
          for(size_t i=0; i<yyvsp[-1].lista_exprs.size(); i++) {
@@ -2771,11 +2791,11 @@ yyreduce:
             }
          }
       }
-#line 2775 "y.tab.c"
+#line 2795 "y.tab.c"
     break;
 
   case 134: /* CHAMA_FUNC: F '(' LISTA_ARGS ')'  */
-#line 1034 "mini_js.y"
+#line 1054 "mini_js.y"
               { 
                 if(yyvsp[-3].nome_var == "print" && busca_simbolo("print") == nullptr) {
                    vector<string> args_code = yyvsp[-1].c;
@@ -2785,64 +2805,64 @@ yyreduce:
                    yyval.c = yyvsp[-1].c + yyvsp[-3].c + "$" ;
                 }
               }
-#line 2789 "y.tab.c"
+#line 2809 "y.tab.c"
     break;
 
   case 135: /* CHAMA_FUNC: LVALUEPROP '(' LISTA_ARGS ')'  */
-#line 1044 "mini_js.y"
+#line 1064 "mini_js.y"
               { 
                 yyval.c = yyvsp[-1].c + yyvsp[-3].esq + yyvsp[-3].dir + "[@]" + "$" ;
               }
-#line 2797 "y.tab.c"
+#line 2817 "y.tab.c"
     break;
 
   case 136: /* LISTA_ARGS: ARGs  */
-#line 1050 "mini_js.y"
+#line 1070 "mini_js.y"
            { 
              yyval.c = yyvsp[0].c + to_string( yyvsp[0].n_args ); 
              yyval.n_args = yyvsp[0].n_args;
            }
-#line 2806 "y.tab.c"
+#line 2826 "y.tab.c"
     break;
 
   case 137: /* LISTA_ARGS: ARGs ','  */
-#line 1055 "mini_js.y"
+#line 1075 "mini_js.y"
            {
              yyval.c = yyvsp[-1].c + to_string( yyvsp[-1].n_args ); 
              yyval.n_args = yyvsp[-1].n_args;
            }
-#line 2815 "y.tab.c"
+#line 2835 "y.tab.c"
     break;
 
   case 138: /* LISTA_ARGS: %empty  */
-#line 1060 "mini_js.y"
+#line 1080 "mini_js.y"
            { 
               yyval.c = vector<string>{"0"}; 
               yyval.n_args = 0; 
            }
-#line 2824 "y.tab.c"
+#line 2844 "y.tab.c"
     break;
 
   case 139: /* ARGs: ATRIB  */
-#line 1067 "mini_js.y"
+#line 1087 "mini_js.y"
       { 
         yyval.c = yyvsp[0].c;     
         yyval.n_args = 1;   
       }
-#line 2833 "y.tab.c"
+#line 2853 "y.tab.c"
     break;
 
   case 140: /* ARGs: ARGs ',' ATRIB  */
-#line 1072 "mini_js.y"
+#line 1092 "mini_js.y"
       { 
         yyval.c = yyvsp[-2].c + yyvsp[0].c; 
         yyval.n_args = yyvsp[-2].n_args + 1; 
       }
-#line 2842 "y.tab.c"
+#line 2862 "y.tab.c"
     break;
 
 
-#line 2846 "y.tab.c"
+#line 2866 "y.tab.c"
 
       default: break;
     }
@@ -3035,7 +3055,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 1079 "mini_js.y"
+#line 1099 "mini_js.y"
 
 
 #include "lex.yy.c"

@@ -1,13 +1,15 @@
 let log = msg => msg asm{println # undefined};
-let f = [];
 
-{
-  let i;
+function cria( obj ) {
+  return (x) => {
+    obj.nome = x; 
+    obj.i++;
+    return obj; 
+  };
+}
 
-  for( i = 0; i < 3; i++ )
-    f[i] = () => log(i);
-}
-{
-  for( let j = 0; j < 3; j++ )
-    f[j]();
-}
+let o = { i: 0 };
+let b = cria( o );
+
+log( b( "Jose" ) );
+log( b( "Manoel" ) );

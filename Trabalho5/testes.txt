@@ -350,7 +350,7 @@ let saida = {
 |{ dobra: { &funcao: ##; captura: { n: 2; }; }; multi: { &funcao: ##; }; saida: { doze: 12; sete: 7; }; triplica: { &funcao: ##; captura: { n: 3; }; }; undefined: undefined; }|
 === Pilha ===
 
-Test 18: #18 Lambda com captura dentro de loop
+Test 18: #18 Lambda com captura dentro de loop ok 
 
 --- Input ---
 let log = msg => msg asm{println # undefined};
@@ -402,7 +402,7 @@ Oi
 |{ a: { &funcao: ##; captura: { obj: { print: { &funcao: ##; captura: { nome: Oi; }; }; }; }; }; cria: { &funcao: ##; }; log: { &funcao: ##; }; undefined: undefined; }|
 === Pilha ===
 
-Test 20: #20 Lambda com captura de objetos
+Test 20: #20 Lambda com captura de objetos ok 
 
 --- Input ---
 let log = msg => msg asm{println # undefined};
