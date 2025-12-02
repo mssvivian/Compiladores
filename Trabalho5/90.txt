@@ -189,6 +189,7 @@ set<string> extrai_ids_de_codigo(vector<string>& codigo) {
   for(const string& s : codigo) {
     // Simples heurística: se começa com letra ou _, é um possível ID
     if(!s.empty() && (isalpha(s[0]) || s[0] == '_') && s[0] != '\'' && !isdigit(s[0])) {
+      // Ignora keywords conhecidas
       if(s != "@" && s != "=" && s != "@" && s != "^" && s != "$" && s != "[=]" && s != "[<=]" && 
          s != "[@]" && s != "&" && s != "~" && s != "#" && s != "?" && s != "!" && 
          s != "+" && s != "-" && s != "*" && s != "/" && s != "%" && s != "==" && s != "!=" &&
@@ -859,9 +860,9 @@ LISTA_PARAMS_OPT : LISTA_PARAMS
                  | { $$.clear(); }
                  ;
 
-LISTA_MISTA : EOBJ
+LISTA_MISTA : ATRIB
             { $$.lista_exprs = {$1}; }
-            | EOBJ ',' LISTA_MISTA
+            | ATRIB ',' LISTA_MISTA
             { $$.lista_exprs = {$1}; 
               $$.lista_exprs.insert($$.lista_exprs.end(), $3.lista_exprs.begin(), $3.lista_exprs.end()); }
             ;
@@ -871,11 +872,6 @@ LISTA_MISTA_OPT : LISTA_MISTA
                 ;
 
 ECOND : ECOND '?' EOBJ ':' EOBJ
-      {
-        string lbl_false = gera_label("ternary_false");
-        string lbl_end = gera_label("ternary_end");
-        $$.c = $1.c + "!" + lbl_false + "?" + $3.c + lbl_end + "#" + define_label(lbl_false) + $5.c + define_label(lbl_end);
-      }
       | ATRIB
       ;
 
@@ -1086,17 +1082,18 @@ LISTA_ARGS : ARGs
            }
            ;
 
-ARGs : EOBJ
+ARGs : ATRIB
       { 
         $$.c = $1.c;     
         $$.n_args = 1;   
       } 
-    | ARGs ',' EOBJ  
+    | ARGs ',' ATRIB  
       { 
         $$.c = $1.c + $3.c; 
         $$.n_args = $1.n_args + 1; 
       }
     ;
+
   
 %%
 
