@@ -1,17 +1,15 @@
-function log( msg ) {
-  msg asm{println # undefined};
+let log = msg => msg asm{println # undefined};
+
+function cria( obj ) {
+  return (x) => {
+    obj.nome = x; 
+    obj.i++;
+    return obj; 
+  };
 }
 
-function criaObj() {
-  return { a : [ {}, { teste: 1 }, c=24*8+1 ], b: 'nome', log: x => print(x) };
-}
+let o = { i: 0 };
+let b = cria( o );
 
-let obj = [];
-let c;
-{ obj = criaObj();
-let c = [];
-
-log( obj );
-log( obj.a );
-log( obj.a[obj.a[1].teste+1] );
-}
+log( b( "Jose" ) );
+log( b( "Manoel" ) );

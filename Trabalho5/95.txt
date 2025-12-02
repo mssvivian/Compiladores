@@ -588,15 +588,6 @@ ATRIB_NO_OBJ
       
       set<string> capturas = detecta_capturas(ids_usados, parametros, locais);
       
-       // Filter out 'print' if not declared
-       for(auto it = capturas.begin(); it != capturas.end(); ) {
-           if(*it == "print" && busca_simbolo("print") == nullptr) {
-               it = capturas.erase(it);
-           } else {
-               ++it;
-           }
-       }
-
        if (capturas.size() > 0) {
            $$.c += "'captura'";
            $$.c += "{}";
@@ -651,18 +642,10 @@ ATRIB_NO_OBJ
       
       set<string> locais;
       for(auto& p : ts.back()) locais.insert(p.first);
-            set<string> capturas = detecta_capturas(ids_usados, parametros, locais);
-       
-       // Filter out 'print' if not declared
-       for(auto it = capturas.begin(); it != capturas.end(); ) {
-           if(*it == "print" && busca_simbolo("print") == nullptr) {
-               it = capturas.erase(it);
-           } else {
-               ++it;
-           }
-       }
-
-        if (capturas.size() > 0) {
+      
+      set<string> capturas = detecta_capturas(ids_usados, parametros, locais);
+      
+       if (capturas.size() > 0) {
            $$.c += "'captura'";
            $$.c += "{}";
            for(const string& cap : capturas) {
@@ -739,15 +722,6 @@ ATRIB_NO_OBJ
        for(auto& p : ts.back()) locais.insert(p.first);
        
        set<string> capturas = detecta_capturas(ids_usados, parametros, locais);
-       
-       // Filter out 'print' if not declared
-       for(auto it = capturas.begin(); it != capturas.end(); ) {
-           if(*it == "print" && busca_simbolo("print") == nullptr) {
-               it = capturas.erase(it);
-           } else {
-               ++it;
-           }
-       }
        
        if (capturas.size() > 0) {
            $$.c += "'captura'";
@@ -826,15 +800,6 @@ ATRIB_NO_OBJ
        
        set<string> capturas = detecta_capturas(ids_usados, parametros, locais);
        
-       // Filter out 'print' if not declared
-       for(auto it = capturas.begin(); it != capturas.end(); ) {
-           if(*it == "print" && busca_simbolo("print") == nullptr) {
-               it = capturas.erase(it);
-           } else {
-               ++it;
-           }
-       }
-       
        if (capturas.size() > 0) {
            $$.c += "'captura'";
            $$.c += "{}";
@@ -909,8 +874,7 @@ ECOND : ECOND '?' EOBJ ':' EOBJ
       {
         string lbl_false = gera_label("ternary_false");
         string lbl_end = gera_label("ternary_end");
-        $$.c = $1.c + "!" + lbl_false + "?" + $3.c + lbl_end + "#" + 
-        define_label(lbl_false) + $5.c + define_label(lbl_end);
+        $$.c = $1.c + "!" + lbl_false + "?" + $3.c + lbl_end + "#" + define_label(lbl_false) + $5.c + define_label(lbl_end);
       }
       | ATRIB
       ;
