@@ -1,1 +1,1 @@
-a & a {} '&funcao' 23 [<=] = ^ <{ 9 1 a @ $ ^ 0 }> '&retorno' @ ~ }> . x & x arguments @ 0 [@] = ^ y @ '&retorno' @ ~ 
+log & log {} '&funcao' 99 [<=] = ^ f & f [] = ^ <{ i & i 0 = ^ i @ 3 < ! 62 ? f @ i @ {} '&funcao' 116 [<=] 'captura' {} 'i' i @ [<=] 'log' log @ [<=] [<=] [=] ^ i @ i i @ 1 + = ^ ^ 22 # }> <{ j & j 0 = ^ j @ 3 < ! 97 ? 0 f @ j @ [@] $ ^ j @ j j @ 1 + = ^ ^ 70 # }> . msg & msg arguments @ 0 [@] = ^ msg @ println # undefined '&retorno' @ ~ i @ 1 log @ $ '&retorno' @ ~ 

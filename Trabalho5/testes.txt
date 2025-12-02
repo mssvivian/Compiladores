@@ -123,7 +123,7 @@ log( map( a, x => x*x + 1 ) );
 |{ a: [ 0: 1; 1: 2; 2: 3; 3: 4; ]; forEach: { &funcao: ##; }; log: { &funcao: ##; }; map: { &funcao: ##; }; undefined: undefined; }|
 === Pilha ===
 
-Test 7: #7 reduce, pipe (aspas nao ta ficando na pilha)
+Test 7: #7 reduce, pipe (aspas nao ta ficando na pilha) ----errado
 --- Input ---
 function log( msg ) {
   msg asm{println # undefined};
@@ -265,7 +265,7 @@ let d = f( 8.1 )( 7.1 );
 |{ a: 8.1; b: { &funcao: ##; }; c: 72.09; d: 65.691; f: { &funcao: ##; }; undefined: undefined; }|
 === Pilha ===
 
-Test 13: #13 Lambda retornando lambda - nao tem aspas
+Test 13: #13 Lambda retornando lambda - nao tem aspas -- ta dando erro 
 --- Input ---
 let f = x => y => x*y;
 let b = f(9);
@@ -333,7 +333,7 @@ chamou [ 0: 2; ]
 |{ c: [ 0: 1; 1: { a: [ 0: 8; 1: 1; ]; }; ]; d: 9; f: { &funcao: ##; }; k: [ 0: 0; ]; log: { &funcao: ##; }; to_string: { &funcao: ##; }; undefined: undefined; }|
 === Pilha ===
 
-Test 17: #17 Lambda com captura Simples 
+Test 17: #17 Lambda com captura Simples - ok 
 
 --- Input ---
 let multi = n => x => x*n;

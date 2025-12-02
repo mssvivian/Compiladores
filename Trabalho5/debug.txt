@@ -1,1 +1,4 @@
-function f(a) {}
+DEBUG: ID SETA 2 push size=2
+DEBUG: ID SETA 2 pop size=1
+DEBUG: empilha_escopo_novo inc back=1
+DEBUG: desempilha_escopo dec back=0

@@ -1,0 +1,174 @@
+0: log
+1: & (let)
+2: log
+3: {} (newObject)
+4: = (set)
+5: &funcao
+6: 78
+7: [=] (setProp)
+8: ^ (pop)
+9: criaObj
+10: & (let)
+11: criaObj
+12: {} (newObject)
+13: = (set)
+14: &funcao
+15: 116
+16: [=] (setProp)
+17: ^ (pop)
+18: obj
+19: & (let)
+20: obj
+21: [] (newArray)
+22: = (set)
+23: ^ (pop)
+24: c
+25: & (let)
+26: <{ (pushEsc)
+27: obj
+28: 0
+29: criaObj
+30: @ (get)
+31: $ (callFunc)
+32: = (set)
+33: ^ (pop)
+34: c
+35: & (let)
+36: c
+37: [] (newArray)
+38: = (set)
+39: ^ (pop)
+40: obj
+41: @ (get)
+42: 1
+43: log
+44: @ (get)
+45: $ (callFunc)
+46: ^ (pop)
+47: obj
+48: @ (get)
+49: a
+50: [@] (getProp)
+51: 1
+52: log
+53: @ (get)
+54: $ (callFunc)
+55: ^ (pop)
+56: obj
+57: @ (get)
+58: a
+59: [@] (getProp)
+60: obj
+61: @ (get)
+62: a
+63: [@] (getProp)
+64: 1
+65: [@] (getProp)
+66: teste
+67: [@] (getProp)
+68: 1
+69: +
+70: [@] (getProp)
+71: 1
+72: log
+73: @ (get)
+74: $ (callFunc)
+75: ^ (pop)
+76: }> (popEsc)
+77: . (halt)
+78: msg
+79: & (let)
+80: msg
+81: arguments
+82: @ (get)
+83: 0
+84: [@] (getProp)
+85: = (set)
+86: ^ (pop)
+87: msg
+88: @ (get)
+89: println
+90: # (goto)
+91: undefined
+92: ^ (pop)
+93: undefined
+94: @ (get)
+95: &retorno
+96: @ (get)
+97: ~ (retFunc)
+98: x
+99: & (let)
+100: x
+101: arguments
+102: @ (get)
+103: 0
+104: [@] (getProp)
+105: = (set)
+106: ^ (pop)
+107: x
+108: @ (get)
+109: 1
+110: print
+111: @ (get)
+112: $ (callFunc)
+113: &retorno
+114: @ (get)
+115: ~ (retFunc)
+116: {} (newObject)
+117: a
+118: [] (newArray)
+119: 0
+120: {} (newObject)
+121: [<=] (objSetProp)
+122: 1
+123: {} (newObject)
+124: teste
+125: 1
+126: [<=] (objSetProp)
+127: [<=] (objSetProp)
+128: 2
+129: c
+130: 24
+131: 8
+132: *
+133: 1
+134: +
+135: = (set)
+136: [<=] (objSetProp)
+137: [<=] (objSetProp)
+138: b
+139: nome
+140: [<=] (objSetProp)
+141: log
+142: {} (newObject)
+143: &funcao
+144: 98
+145: [<=] (objSetProp)
+146: captura
+147: {} (newObject)
+148: print
+149: print
+150: @ (get)
+151: [<=] (objSetProp)
+152: [<=] (objSetProp)
+153: [<=] (objSetProp)
+154: &retorno
+155: @ (get)
+156: ~ (retFunc)
+157: undefined
+158: @ (get)
+159: &retorno
+160: @ (get)
+161: ~ (retFunc)
+
+=== Console ===
+|{ c: 193; criaObj: { &funcao: 116; }; log: { &funcao: 78; }; obj: [ ]; undefined: undefined; }|
+|{ }|
+|{ &retorno: 32; arguments: [ ]; }|
+|obj|
+|{ a: [ 0: { }; 1: { teste: 1; }; 2: 193; ]; b: nome; }|
+|log|
+|{ &funcao: 98; }|
+|captura|
+|{ }|
+|print|

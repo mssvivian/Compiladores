@@ -173,8 +173,7 @@ set<string> extrai_ids_de_codigo(vector<string>& codigo) {
       if(s != "@" && s != "=" && s != "@" && s != "^" && s != "$" && s != "[=]" && s != "[<=]" && 
          s != "[@]" && s != "&" && s != "~" && s != "#" && s != "?" && s != "!" && 
          s != "+" && s != "-" && s != "*" && s != "/" && s != "%" && s != "==" && s != "!=" &&
-         s != "<" && s != ">" && s != "<=" && s != ">=" && s != "<{" && s != "}>" && s != "{}" &&
-         s != "println" && s != "to_string" && s != "undefined" && s.substr(0, 5) != "temp_" && s.substr(0, 5) != "func_") {
+         s != "<" && s != ">" && s != "<=" && s != ">=" && s != "<{" && s != "}>" && s != "{}") {
         ids.insert(s);
       }
     }
@@ -232,7 +231,7 @@ CMD : CMD_LET ';'
     | CMD_FOR
     | CMD_WHILE
     | CMD_RET ';'
-
+    | CMD_ASM ';'
     | ATRIB_NO_OBJ ';'
       { $$.c = $1.c + "^"; } 
     | BLOCO
@@ -283,7 +282,8 @@ CMD_RET : RETURN
           }
         ;
 
-
+CMD_ASM : E ASM { $$.c = $1.c + $2.c + "^"; }
+        ;
 
 EMPILHA_TS_FUNC : { ts.push_back( map< string, Simbolo >{} ); 
                 blocos_alinhados_em_funcao.push_back(0);} 
@@ -457,7 +457,7 @@ LVALUEPROP : LVALUEPROP '[' EOBJ ']'
            | LVALUEPROP '.' ID  
             { $$.c.clear(); 
               $$.esq = $1.esq + $1.dir + "[@]";
-              $$.dir = vector<string>{"'" + $3.c[0] + "'"};
+              $$.dir = $3.c;
                } // obj.prop.prop
            | F '[' EOBJ ']'
              { $$.c.clear(); 
@@ -467,7 +467,7 @@ LVALUEPROP : LVALUEPROP '[' EOBJ ']'
            | F '.' ID  //F1 . ID
             { $$.c.clear(); 
               $$.esq = $1.c;
-              $$.dir = vector<string>{"'" + $3.c[0] + "'"};
+              $$.dir = $3.c;
               } 
            ;
 
@@ -559,29 +559,6 @@ ATRIB_NO_OBJ
       vector<string> codigo_params = $3.c;
       
       $$.c = vector<string>{"{}"} + "'&funcao'" + endereco_funcao + "[<=]";
-      
-      set<string> ids_usados = extrai_ids_de_codigo($4.c);
-      set<string> parametros;
-      parametros.insert($1.c[0]);
-      
-      set<string> locais;
-      for(auto& p : ts.back()) locais.insert(p.first);
-      
-      set<string> capturas = detecta_capturas(ids_usados, parametros, locais);
-      
-       if (capturas.size() > 0) {
-           $$.c += "'captura'";
-           $$.c += "{}";
-           for(const string& cap : capturas) {
-               if(cap == "print" && busca_simbolo("print") == nullptr) continue;
-               $$.c += "'" + cap + "'";
-               $$.c += cap;
-               $$.c += "@";
-               $$.c += "[<=]";
-           }
-           $$.c += "[<=]";
-       }
-
       funcoes = funcoes + define_label(endereco_funcao) + codigo_params + $4.c +
                 "undefined" + "'&retorno'" + "@" + "~";
       
@@ -617,29 +594,6 @@ ATRIB_NO_OBJ
       vector<string> codigo_params = $3.c;
       
       $$.c = vector<string>{"{}"} + "'&funcao'" + endereco_funcao + "[<=]";
-      
-      set<string> ids_usados = extrai_ids_de_codigo($4.c);
-      set<string> parametros;
-      parametros.insert($1.c[0]);
-      
-      set<string> locais;
-      for(auto& p : ts.back()) locais.insert(p.first);
-      
-      set<string> capturas = detecta_capturas(ids_usados, parametros, locais);
-      
-       if (capturas.size() > 0) {
-           $$.c += "'captura'";
-           $$.c += "{}";
-           for(const string& cap : capturas) {
-               if(cap == "print" && busca_simbolo("print") == nullptr) continue;
-               $$.c += "'" + cap + "'";
-               $$.c += cap;
-               $$.c += "@";
-               $$.c += "[<=]";
-           }
-           $$.c += "[<=]";
-       }
-
       funcoes = funcoes + define_label(endereco_funcao) + codigo_params + $4.c +
                 "'&retorno'" + "@" + "~";
       
@@ -695,29 +649,6 @@ ATRIB_NO_OBJ
        vector<string> codigo_params = $5.c;
 
        $$.c = vector<string>{"{}"} + "'&funcao'" + endereco_funcao + "[<=]";
-       
-       set<string> ids_usados = extrai_ids_de_codigo($6.c);
-       set<string> parametros;
-       for(auto& p : $2.lista_exprs) parametros.insert(p.nome_var);
-       
-       set<string> locais;
-       for(auto& p : ts.back()) locais.insert(p.first);
-       
-       set<string> capturas = detecta_capturas(ids_usados, parametros, locais);
-       
-       if (capturas.size() > 0) {
-           $$.c += "'captura'";
-           $$.c += "{}";
-           for(const string& cap : capturas) {
-               if(cap == "print" && busca_simbolo("print") == nullptr) continue;
-               $$.c += "'" + cap + "'";
-               $$.c += cap;
-               $$.c += "@";
-               $$.c += "[<=]";
-           }
-           $$.c += "[<=]";
-       }
-
        funcoes = funcoes + define_label(endereco_funcao) + codigo_params + $6.c +
                  "'&retorno'" + "@" + "~";
        ts.pop_back(); 
@@ -772,29 +703,6 @@ ATRIB_NO_OBJ
        vector<string> codigo_params = $5.c;
 
        $$.c = vector<string>{"{}"} + "'&funcao'" + endereco_funcao + "[<=]";
-       
-       set<string> ids_usados = extrai_ids_de_codigo($6.c);
-       set<string> parametros;
-       for(auto& p : $2.lista_exprs) parametros.insert(p.nome_var);
-       
-       set<string> locais;
-       for(auto& p : ts.back()) locais.insert(p.first);
-       
-       set<string> capturas = detecta_capturas(ids_usados, parametros, locais);
-       
-       if (capturas.size() > 0) {
-           $$.c += "'captura'";
-           $$.c += "{}";
-           for(const string& cap : capturas) {
-               if(cap == "print" && busca_simbolo("print") == nullptr) continue;
-               $$.c += "'" + cap + "'";
-               $$.c += cap;
-               $$.c += "@";
-               $$.c += "[<=]";
-           }
-           $$.c += "[<=]";
-       }
-
        funcoes = funcoes + define_label(endereco_funcao) + codigo_params + $6.c +
                  "undefined" + "'&retorno'" + "@" + "~";
        ts.pop_back(); 
@@ -893,8 +801,6 @@ E :  LVALUEPROP
     { $$.c = $1.c + $3.c + $2.c; }
   | UN
     { $$.c = $1.c; $$.nome_var = $1.nome_var; }
-  | E ASM
-    { $$.c = $1.c + $2.c; }
   ;
 
 UN  : MAIS_MAIS ID 
@@ -1032,13 +938,7 @@ F: ID
 
 CHAMA_FUNC : F '(' LISTA_ARGS ')' 
               { 
-                if($1.nome_var == "print" && busca_simbolo("print") == nullptr) {
-                   vector<string> args_code = $3.c;
-                   if(!args_code.empty()) args_code.pop_back();
-                   $$.c = args_code + "print" + "#" + "undefined";
-                } else {
-                   $$.c = $3.c + $1.c + "$" ;
-                }
+                $$.c = $3.c + $1.c + "$" ;
               }
             | LVALUEPROP '(' LISTA_ARGS ')' 
               { 
@@ -1166,6 +1066,7 @@ void checa_simbolo( string nome, bool modificavel ) {
 void yyerror( const char* st ) {
   cerr << st << endl; 
   cerr << "Linha: " << linha << " Coluna: " << coluna << endl;
+  cerr << "Proximo a: " << yytext << endl;
    exit( 1 );
 }
 
@@ -1174,3 +1075,6 @@ int main( int argc, char* argv[] ) {
   
   return 0;
 }
+
+
+
